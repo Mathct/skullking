@@ -151,7 +151,7 @@ class Game extends \Table
         // Init global values with their initial values.
 
         $this->setGameStateInitialValue("round_max_bid", 0);
-        $this->setGameStateInitialValue("round_nb", 9);
+        $this->setGameStateInitialValue("round_nb", 0);
         $this->setGameStateInitialValue("requested_color", 0);
         $this->setGameStateInitialValue("requested_color_cannot_change", 0);
         $this->setGameStateInitialValue("tigress_role", 0);
