@@ -1,0 +1,85 @@
+{
+    "100": {
+        "name": "Kraken",
+        "values": {
+            "1": {
+                "name": "Off", 
+                "tmdisplay": "", 
+                "description": "Playing without Kraken card"
+            },
+
+            "2": {
+                "name": "On", 
+                "tmdisplay": "Kraken", 
+                "description": "Playing with Kraken card"
+            }            
+            
+                
+        },
+        
+        "default": 1
+    },
+
+    "101": {
+        "name": "White Whale",
+        "values": {
+            "1": {
+                "name": "Off", 
+                "tmdisplay": "", 
+                "description": "Playing without White Whale card"
+            },
+
+            "2": {
+                "name": "On", 
+                "tmdisplay": "White Whale", 
+                "description": "Playing with White Whale card"
+            }            
+            
+                
+        },
+        
+        "default": 1
+    },
+
+    "102": {
+        "name": "Loot",
+        "values": {
+            "1": {
+                "name": "Off", 
+                "tmdisplay": "", 
+                "description": "Playing without Loot cards"
+            },
+
+            "2": {
+                "name": "On", 
+                "tmdisplay": "Loot", 
+                "description": "Playing with Loot cards"
+            }            
+            
+                
+        },
+        
+        "default": 1
+    },
+
+    "103": {
+        "name": "Pirate Powers",
+        "values": {
+            "1": {
+                "name": "Off", 
+                "tmdisplay": "", 
+                "description": "Playing without Pirate Powers"
+            },
+
+            "2": {
+                "name": "On", 
+                "tmdisplay": "Pirate Powers", 
+                "description": "Playing with Pirate Powers"
+            }            
+            
+                
+        },
+        
+        "default": 1
+    }
+}

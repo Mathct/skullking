@@ -1,0 +1,80 @@
+{
+  "table": {
+
+        "sk_captured": {
+          "id": 10,
+          "name": "Number of Skull King captured",
+          "type": "int"
+        },
+
+        "pirate_captured": {
+          "id": 11,
+          "name": "Number of Pirates captured",
+          "type": "int"
+        },
+
+        "mermaid_captured": {
+          "id": 12,
+          "name": "Number of Mermaids captured",
+          "type": "int"
+        }
+
+                
+    },
+
+    
+    "player": {
+
+      "total_round_1": {
+        "id": 10,
+        "name": "Total Round 1",
+        "type": "int"
+      },
+      "total_round_2": {
+        "id": 11,
+        "name": "Total Round 2",
+        "type": "int"
+      },
+      "total_round_3": {
+        "id": 12,
+        "name": "Total Round 3",
+        "type": "int"
+      },
+      "total_round_4": {
+        "id": 13,
+        "name": "Total Round 4",
+        "type": "int"
+      },
+      "total_round_5": {
+        "id": 14,
+        "name": "Total Round 5",
+        "type": "int"
+      },
+      "total_round_6": {
+        "id": 15,
+        "name": "Total Round 6",
+        "type": "int"
+      },
+      "total_round_7": {
+        "id": 16,
+        "name": "Total Round 7",
+        "type": "int"
+      },
+      "total_round_8": {
+        "id": 17,
+        "name": "Total Round 8",
+        "type": "int"
+      },
+      "total_round_9": {
+        "id": 18,
+        "name": "Total Round 9",
+        "type": "int"
+      },
+      "total_round_10": {
+        "id": 19,
+        "name": "Total Round 10",
+        "type": "int"
+      }
+    }
+
+}
