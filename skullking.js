@@ -738,12 +738,8 @@ setupBoard: function () {
 
     this.setupStocks();
 
-
-    //this.setupBids();
     this.setupRosie();
-    /*if( this.gamedatas.rosie_container > 0) {
-        this.setupRosie();
-    }*/
+   
     if( parseInt(this.gamedatas.rascal_container) == this.player_id) {
         this.setupRascal();
     }    
@@ -757,15 +753,14 @@ setupBoard: function () {
     } 
 
     if(this.isSpectator ) {
-        //dojo.addClass('bids_container', 'hidden');
+        
         dojo.addClass('hand_container', 'hidden');
-        //dojo.removeClass('table_cards_container', 'hidden');
-
+        
         let board = document.getElementById("board_id");
         board.style.height = "700px";
     }
 
-    // SHOW SCORE
+    // ICON SHOW SCORE
 
     if((!this.isSpectator)&&(this.gamedatas.end_of_game == 0))
     {
