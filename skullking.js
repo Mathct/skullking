@@ -99,6 +99,7 @@ setup: function( gamedatas )
     this.setupTooltips();
 
     this.setupNotifications();
+    
 
 
   // THOUN
@@ -974,7 +975,6 @@ setupStocks: function() {
     //this.hand.onChangeSelection = this.onActionPlayCard.bind(this);
     //this.handStock.setSelectionAppearance('class');
     this.handStock.onItemCreate = this.setupNewCard.bind(this); //add tooltip
-    //dojo.connect( this.handStock, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 
 
     // Stock pour la table : pas de weight pour la table pour ne pas classer les cartes selon leur type.
@@ -992,15 +992,13 @@ setupStocks: function() {
     this.deckStock = this.createStockForCards(this, $('deck_cards'));
     this.deckStock.setSelectionMode(0);
     this.deckStock.setOverlap(30, 0);
-    //this.deckStock.setOverlap(30, 70);
     this.deckStock.autowidth = true;
     this.deckStock.use_vertical_overlap_as_offset = false; // OK
-    //this.deckStock.vertical_overlap = -20;
+
     for( var card_id = 1; card_id <= 70; card_id++) {
         this.deckStock.addItemType(card_id, card_id, g_gamethemeurl + 'img/SK_cards.jpg', card_id-1);
     }
-    //this.hand.onChangeSelection = this.onActionPlayCard.bind(this);
-    //this.handStock.setSelectionAppearance('class');
+
     this.deckStock.onItemCreate = this.setupNewCard.bind(this); //add tooltip
 
 
@@ -1123,7 +1121,6 @@ setupNewCard: function( card_div, card_type_id, card_id ) {
     //console.log('card_type_id',card_type_id );
     //console.log('card_id',card_id );
 
-
     let html = '<div class="tooltip_content">';
 
     const x = '-' + (card_type_id-1) % 14 + '00%';
@@ -1220,10 +1217,13 @@ console.log('PIRATE POWER',parseInt(this.gamedatas.pirate_powers_mode));
         this.addCustomTooltip( card_id, html );
         
     }
+
     
     
 
 },
+
+
 
 setupCounters: function() {
 
@@ -1560,12 +1560,13 @@ notif_playCard: async function(args) {
     const card_div = document.getElementById('table_cards_item_' + card.id);
     dojo.place('<div class="player-title" style="color: #' + player.color + '">' + player.name + '</div>', card_div);
 
+    //this.createCardTooltip( card.type, card.id);
 
-    // Destroy the card for the current player
+        // Destroy the card for the current player
     if (this.player_id == card.location_arg) {
 
         this.handStock.removeFromStockById(card.id);
-        delete this.my_hand[card.id];
+        //delete this.my_hand[card.id];
         //dojo.query('#hand_cards .stockitem').removeClass('unselectable');
     }
 
@@ -1907,15 +1908,22 @@ activateHelpMode() {
     this._helpMode = true;
     dojo.addClass('ebd-body', 'help-mode');
     this._displayedTooltip = null;
-    document.body.addEventListener('click', this.closeCurrentTooltip.bind(this));
+
+    this._boundCloseTooltip = this.closeCurrentTooltip.bind(this); // ✅ Store reference
+    document.body.addEventListener('click', this._boundCloseTooltip);
 },
 
 desactivateHelpMode() {
     this.closeCurrentTooltip();
     this._helpMode = false;
     dojo.removeClass('ebd-body', 'help-mode');
-    document.body.removeEventListener('click', this.closeCurrentTooltip.bind(this));
+
+    if (this._boundCloseTooltip) {
+        document.body.removeEventListener('click', this._boundCloseTooltip); // ✅ Remove using same reference
+        this._boundCloseTooltip = null;
+    }
 },
+
 
 closeCurrentTooltip() {
     if (!this._helpMode) 
@@ -1961,119 +1969,131 @@ onClick(node, callback, temporary = true) {
      */
 
 
-addCustomTooltip(id, html, config = {}) {
-    config = Object.assign(
-        {
-            delay: 400,
-            midSize: true,
-            forceRecreate: false,
-        },
-        config,
-    );
-
-    let isMobile = window.matchMedia('(pointer: coarse)').matches;
-    let longPressTimer = null;
-
-    let getContent = () => {
-        let content = typeof html === 'function' ? html() : html;
-        if (config.midSize) {
-            content = '<div class="midSizeDialog">' + content + '</div>';
-        }
-        return content;
-    };
-
-    if (this.tooltips[id] && !config.forceRecreate) {
-        this.tooltips[id].getContent = getContent;
-        return;
-    }
-
-    let tooltip = new dijit.Tooltip({
-        getContent,
-        position: this.defaultTooltipPosition,
-        showDelay: config.delay,
-    });
-    this.tooltips[id] = tooltip;
-    dojo.addClass(id, 'tooltipable');
-
-    // Empêcher l'affichage au simple clic sur mobile
-    dojo.connect($(id), 'click', (evt) => {
-        if (isMobile && !this._helpMode) {
-            evt.stopPropagation();
-            return; // Bloque l'affichage du tooltip sur mobile sauf en mode help
-        }
-
-        if (!this._helpMode) {
-            tooltip.close();
-        } else {
-            evt.stopPropagation();
-
-            if (tooltip.state === 'SHOWING') {
-                this.closeCurrentTooltip();
+    addCustomTooltip(id, html, config = {}) {
+        config = Object.assign(
+            {
+                delay: 400,
+                midSize: true,
+                forceRecreate: false,
+            },
+            config,
+        );
+    
+        let isMobile = window.matchMedia('(pointer: coarse)').matches;
+        let longPressTimer = null;
+    
+        let getContent = () => {
+            let content = typeof html === 'function' ? html() : html;
+            if (config.midSize) {
+                content = '<div class="midSizeDialog">' + content + '</div>';
+            }
+            return content;
+        };
+    
+        let node = $(id);
+        if (!node) return;
+    
+        // Nettoyer l'ancien tooltip si nécessaire
+        if (this.tooltips[id]) {
+            const existing = this.tooltips[id];
+            // Vérifie si l’élément DOM a changé ou si on force la recréation
+            if (config.forceRecreate || existing._targetNode !== node) {
+                existing.destroy();
+                delete this.tooltips[id];
             } else {
-                this.closeCurrentTooltip();
-                tooltip.open($(id));
-                this._displayedTooltip = tooltip;
+                // On met simplement à jour le contenu
+                existing.getContent = getContent;
+                return;
             }
         }
-    });
+    
+        let tooltip = new dijit.Tooltip({
+            getContent,
+            position: this.defaultTooltipPosition,
+            showDelay: config.delay,
+        });
+        tooltip._targetNode = node; // Pour détecter les changements ultérieurs
+    
+        this.tooltips[id] = tooltip;
+        dojo.addClass(id, 'tooltipable');
+    
+        // Empêcher l'affichage au simple clic sur mobile
+        dojo.connect(node, 'click', (evt) => {
+            if (isMobile && !this._helpMode) {
+                evt.stopPropagation();
+                return;
+            }
+    
+            if (!this._helpMode) {
+                tooltip.close();
+            } else {
+                evt.stopPropagation();
+                if (tooltip.state === 'SHOWING') {
+                    this.closeCurrentTooltip();
+                } else {
+                    this.closeCurrentTooltip();
+                    tooltip.open(node);
+                    this._displayedTooltip = tooltip;
+                }
+            }
+        });
+    
+        tooltip.showTimeout = null;
+    
+        // Gestion du long press sur mobile
+        dojo.connect(node, 'touchstart', () => {
+            if (isMobile) {
+                longPressTimer = setTimeout(() => {
+                    tooltip.open(node);
+                }, 500);
+            }
+        });
+    
+        dojo.connect(node, 'touchend', () => {
+            if (isMobile) {
+                clearTimeout(longPressTimer);
+            }
+        });
+    
+        dojo.connect(node, 'touchmove', () => {
+            if (isMobile) {
+                clearTimeout(longPressTimer);
+            }
+        });
+    
+        // Gestion PC classique
+        dojo.connect(node, 'mouseenter', (evt) => {
+            evt.stopPropagation();
+            if (!this._helpMode && !this._dragndropMode) {
+                if (isMobile) return;
+    
+                if (tooltip.showTimeout != null)
+                    clearTimeout(tooltip.showTimeout);
+    
+                tooltip.showTimeout = setTimeout(() => {
+                    if (node) tooltip.open(node);
+                }, config.delay);
+            }
+        });
+    
+        dojo.connect(node, 'mouseleave', (evt) => {
+            evt.stopPropagation();
+            if (!this._helpMode && !this._dragndropMode) {
+                tooltip.close();
+                if (tooltip.showTimeout != null)
+                    clearTimeout(tooltip.showTimeout);
+            }
+        });
+    },
 
-    tooltip.showTimeout = null;
-
-    // Gestion du long press sur mobile
-    dojo.connect($(id), 'touchstart', (evt) => {
-        if (isMobile) {
-            longPressTimer = setTimeout(() => {
-                tooltip.open($(id));
-            }, 500); // 500ms = temps pour considérer un long press
-        }
-    });
-
-    dojo.connect($(id), 'touchend', (evt) => {
-        if (isMobile) {
-            clearTimeout(longPressTimer);
-        }
-    });
-
-    dojo.connect($(id), 'touchmove', (evt) => {
-        if (isMobile) {
-            clearTimeout(longPressTimer); // Annule le long press si l'utilisateur glisse son doigt
-        }
-    });
-
-    // Gestion normale des tooltips sur PC
-    dojo.connect($(id), 'mouseenter', (evt) => {
-        evt.stopPropagation();
-
-        if (!this._helpMode && !this._dragndropMode) {
-            if (isMobile) return; // Bloque l'affichage des tooltips sur mobile hors help mode
-
-            if (tooltip.showTimeout != null) 
-                clearTimeout(tooltip.showTimeout);
-
-            tooltip.showTimeout = setTimeout(() => {
-                if ($(id)) 
-                    tooltip.open($(id));
-            }, config.delay);
-        }
-    });
-
-    dojo.connect($(id), 'mouseleave', (evt) => {
-        evt.stopPropagation();
-        if (!this._helpMode && !this._dragndropMode) {
-            tooltip.close();
-            if (tooltip.showTimeout != null) 
-                clearTimeout(tooltip.showTimeout);
-        }
-    });
-},
 
 
 destroyTooltip(elem) {
-    if (this.tooltips[elem.id]) {
-    clearTimeout(this.tooltips[elem.id].showTimeout);
-    this.tooltips[elem.id].close();
-    this.tooltips[elem.id].destroy();
-    delete this.tooltips[elem.id];
+    if (elem && elem.id && this.tooltips[elem.id]) {
+        clearTimeout(this.tooltips[elem.id].showTimeout);
+        this.tooltips[elem.id].close();
+        this.tooltips[elem.id].destroy();
+        delete this.tooltips[elem.id];
     }
 },
 

@@ -171,20 +171,20 @@ class Game extends \Table
 
         // STATS
 
-        self::initStat( 'table', 'sk_captured', 0 );
-        self::initStat( 'table', 'pirate_captured', 0 );
-        self::initStat( 'table', 'mermaid_captured', 0 );
+        self::initStat('table', 'sk_captured', 0);
+        self::initStat('table', 'pirate_captured', 0);
+        self::initStat('table', 'mermaid_captured', 0);
 
-        self::initStat( 'player', 'total_round_1', 0 );
-        self::initStat( 'player', 'total_round_2', 0 );
-        self::initStat( 'player', 'total_round_3', 0 );
-        self::initStat( 'player', 'total_round_4', 0 );
-        self::initStat( 'player', 'total_round_5', 0 );
-        self::initStat( 'player', 'total_round_6', 0 );
-        self::initStat( 'player', 'total_round_7', 0 );
-        self::initStat( 'player', 'total_round_8', 0 );
-        self::initStat( 'player', 'total_round_9', 0 );
-        self::initStat( 'player', 'total_round_10', 0 );
+        self::initStat('player', 'total_round_1', 0);
+        self::initStat('player', 'total_round_2', 0);
+        self::initStat('player', 'total_round_3', 0);
+        self::initStat('player', 'total_round_4', 0);
+        self::initStat('player', 'total_round_5', 0);
+        self::initStat('player', 'total_round_6', 0);
+        self::initStat('player', 'total_round_7', 0);
+        self::initStat('player', 'total_round_8', 0);
+        self::initStat('player', 'total_round_9', 0);
+        self::initStat('player', 'total_round_10', 0);
 
 
         // First Player
@@ -310,8 +310,7 @@ class Game extends \Table
         $result['scoring'] = $this->getObjectListFromDB($sql);
 
         $result['tigress_role'] = $this->getGameStateValue('tigress_role');
-        if($this->getGameStateValue('tigress_role') != 0)
-        {
+        if ($this->getGameStateValue('tigress_role') != 0) {
             $result['tigress_cardid'] = self::getUniqueValueFromDB("SELECT card_id FROM card WHERE card_type='tigress'");
         }
 
@@ -368,7 +367,7 @@ class Game extends \Table
     {
         $round = $this->getGameStateValue("round_nb");
 
-        return $round*10;
+        return $round * 10;
     }
 
 
@@ -535,9 +534,7 @@ class Game extends \Table
 
             if ($type == 'loot') {
                 $ordre_card_type[] = 'escape';
-            } 
-            
-            else {
+            } else {
                 $ordre_card_type[] = $type;
             }
         }
@@ -619,30 +616,20 @@ class Game extends \Table
 
                     $type_escape = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_location_arg = '{$winner}'");
 
-                    if($type_escape == 'loot')
-                    {
-                        if($loot_nb_in_turn == 1)
-                        {
+                    if ($type_escape == 'loot') {
+                        if ($loot_nb_in_turn == 1) {
                             $loot_nb_in_turn = 0; // si y a qu'1 seul loot en premiere position... il n'est pas pris en compte
-                            
+
                         }
 
-                        if($loot_nb_in_turn == 2)
-                        {
+                        if ($loot_nb_in_turn == 2) {
                             $loot_nb_in_turn = 1; // si y a 2 loot et 1 en premiere position... le premier ne sera pas pris en compte... le second prendra la place du premier 
                             $loot1_play = $loot2_play;
                             $loot2_play = 0;
                             game::$instance->setGameStateValue("loot_1_id_play", $loot1_play);
                             game::$instance->setGameStateValue("loot_2_id_play", 0);
-                            
                         }
-
-
                     }
-
-
-                    
-
                 }
             }
 
@@ -665,43 +652,43 @@ class Game extends \Table
                             $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot1_play}'");
 
                             game::$instance->notifyAllPlayers(
-                            'message',
-                            clienttranslate('${player_name} and ${opponent} share ${icon}'),
-                            array(
-                                'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                    'args'=> ['opponent_name' => $play_name, 'color'=>$play_color]
-                                                ],
+                                'message',
+                                clienttranslate('${player_name} and ${opponent} share ${icon}'),
+                                array(
+                                    'opponent' =>    [
+                                        'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                        'args' => ['opponent_name' => $play_name, 'color' => $play_color]
+                                    ],
 
-                                'player_name' => $winner_name,
-                                'icon' => $iconloot,
-                                
-                            )
+                                    'player_name' => $winner_name,
+                                    'icon' => $iconloot,
+
+                                )
                             );
-
                         } else // si c'est le 2eme du round
                         {
                             game::$instance->setGameStateValue("loot_2_id_win", $winner);
                             game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$winner}'");
                             game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot2_play}'");
-                            
+
                             $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
                             $play_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot2_play}'");
                             $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot2_play}'");
 
                             game::$instance->notifyAllPlayers(
-                            'message',
-                            clienttranslate('${player_name} and ${opponent} share ${icon}'),
-                            array(
-                                'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                    'args'=> ['opponent_name' => $play_name, 'color'=>$play_color]
-                                                ],
+                                'message',
+                                clienttranslate('${player_name} and ${opponent} share ${icon}'),
+                                array(
+                                    'opponent' =>    [
+                                        'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                        'args' => ['opponent_name' => $play_name, 'color' => $play_color]
+                                    ],
 
-                                'player_name' => $winner_name,
-                                'icon' => $iconloot,
-                                
-                            )
+                                    'player_name' => $winner_name,
+                                    'icon' => $iconloot,
+
+                                )
                             );
-
                         }
                     }
 
@@ -723,29 +710,31 @@ class Game extends \Table
                             'message',
                             clienttranslate('${player_name} and ${opponent} share ${icon}'),
                             array(
-                                'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                    'args'=> ['opponent_name' => $play_name1, 'color'=>$play_color1]
-                                                ],
+                                'opponent' =>    [
+                                    'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                    'args' => ['opponent_name' => $play_name1, 'color' => $play_color1]
+                                ],
 
                                 'player_name' => $winner_name,
                                 'icon' => $iconloot,
-                                
+
                             )
-                            );
+                        );
 
                         game::$instance->notifyAllPlayers(
                             'message',
                             clienttranslate('${player_name} and ${opponent} share ${icon}'),
                             array(
-                                'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                    'args'=> ['opponent_name' => $play_name2, 'color'=>$play_color2]
-                                                ],
+                                'opponent' =>    [
+                                    'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                    'args' => ['opponent_name' => $play_name2, 'color' => $play_color2]
+                                ],
 
                                 'player_name' => $winner_name,
                                 'icon' => $iconloot,
-                                
+
                             )
-                            );
+                        );
                     }
                 }
             }
@@ -774,17 +763,18 @@ class Game extends \Table
                                 $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot1_play}'");
 
                                 game::$instance->notifyAllPlayers(
-                                'message',
-                                clienttranslate('${player_name} and ${opponent} share ${icon}'),
-                                array(
-                                    'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                        'args'=> ['opponent_name' => $play_name, 'color'=>$play_color]
-                                                    ],
+                                    'message',
+                                    clienttranslate('${player_name} and ${opponent} share ${icon}'),
+                                    array(
+                                        'opponent' =>    [
+                                            'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                            'args' => ['opponent_name' => $play_name, 'color' => $play_color]
+                                        ],
 
-                                    'player_name' => $winner_name,
-                                    'icon' => $iconloot,
-                                    
-                                )
+                                        'player_name' => $winner_name,
+                                        'icon' => $iconloot,
+
+                                    )
                                 );
                             } else {
                                 game::$instance->setGameStateValue("loot_2_id_win", $winner);
@@ -796,17 +786,18 @@ class Game extends \Table
                                 $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot2_play}'");
 
                                 game::$instance->notifyAllPlayers(
-                                'message',
-                                clienttranslate('${player_name} and ${opponent} share ${icon}'),
-                                array(
-                                    'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                        'args'=> ['opponent_name' => $play_name, 'color'=>$play_color]
-                                                    ],
+                                    'message',
+                                    clienttranslate('${player_name} and ${opponent} share ${icon}'),
+                                    array(
+                                        'opponent' =>    [
+                                            'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                            'args' => ['opponent_name' => $play_name, 'color' => $play_color]
+                                        ],
 
-                                    'player_name' => $winner_name,
-                                    'icon' => $iconloot,
-                                    
-                                )
+                                        'player_name' => $winner_name,
+                                        'icon' => $iconloot,
+
+                                    )
                                 );
                             }
                         }
@@ -828,29 +819,31 @@ class Game extends \Table
                                 'message',
                                 clienttranslate('${player_name} and ${opponent} share ${icon}'),
                                 array(
-                                    'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                        'args'=> ['opponent_name' => $play_name1, 'color'=>$play_color1]
-                                                    ],
+                                    'opponent' =>    [
+                                        'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                        'args' => ['opponent_name' => $play_name1, 'color' => $play_color1]
+                                    ],
 
                                     'player_name' => $winner_name,
                                     'icon' => $iconloot,
-                                    
+
                                 )
-                                );
+                            );
 
                             game::$instance->notifyAllPlayers(
                                 'message',
                                 clienttranslate('${player_name} and ${opponent} share ${icon}'),
                                 array(
-                                    'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                        'args'=> ['opponent_name' => $play_name2, 'color'=>$play_color2]
-                                                    ],
+                                    'opponent' =>    [
+                                        'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                        'args' => ['opponent_name' => $play_name2, 'color' => $play_color2]
+                                    ],
 
                                     'player_name' => $winner_name,
                                     'icon' => $iconloot,
-                                    
+
                                 )
-                                );
+                            );
                         }
                     }
                 } else {
@@ -875,17 +868,18 @@ class Game extends \Table
                                 $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot1_play}'");
 
                                 game::$instance->notifyAllPlayers(
-                                'message',
-                                clienttranslate('${player_name} and ${opponent} share ${icon}'),
-                                array(
-                                    'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                        'args'=> ['opponent_name' => $play_name, 'color'=>$play_color]
-                                                    ],
+                                    'message',
+                                    clienttranslate('${player_name} and ${opponent} share ${icon}'),
+                                    array(
+                                        'opponent' =>    [
+                                            'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                            'args' => ['opponent_name' => $play_name, 'color' => $play_color]
+                                        ],
 
-                                    'player_name' => $winner_name,
-                                    'icon' => $iconloot,
-                                    
-                                )
+                                        'player_name' => $winner_name,
+                                        'icon' => $iconloot,
+
+                                    )
                                 );
                             } else {
                                 game::$instance->setGameStateValue("loot_2_id_win", $winner);
@@ -897,17 +891,18 @@ class Game extends \Table
                                 $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot2_play}'");
 
                                 game::$instance->notifyAllPlayers(
-                                'message',
-                                clienttranslate('${player_name} and ${opponent} share ${icon}'),
-                                array(
-                                    'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                        'args'=> ['opponent_name' => $play_name, 'color'=>$play_color]
-                                                    ],
+                                    'message',
+                                    clienttranslate('${player_name} and ${opponent} share ${icon}'),
+                                    array(
+                                        'opponent' =>    [
+                                            'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                            'args' => ['opponent_name' => $play_name, 'color' => $play_color]
+                                        ],
 
-                                    'player_name' => $winner_name,
-                                    'icon' => $iconloot,
-                                    
-                                )
+                                        'player_name' => $winner_name,
+                                        'icon' => $iconloot,
+
+                                    )
                                 );
                             }
                         }
@@ -929,29 +924,31 @@ class Game extends \Table
                                 'message',
                                 clienttranslate('${player_name} and ${opponent} share ${icon}'),
                                 array(
-                                    'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                        'args'=> ['opponent_name' => $play_name1, 'color'=>$play_color1]
-                                                    ],
+                                    'opponent' =>    [
+                                        'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                        'args' => ['opponent_name' => $play_name1, 'color' => $play_color1]
+                                    ],
 
                                     'player_name' => $winner_name,
                                     'icon' => $iconloot,
-                                    
+
                                 )
-                                );
+                            );
 
                             game::$instance->notifyAllPlayers(
                                 'message',
                                 clienttranslate('${player_name} and ${opponent} share ${icon}'),
                                 array(
-                                    'opponent' =>    [   'log' => '<b style="color: #${color};">${opponent_name}</b>',
-                                                        'args'=> ['opponent_name' => $play_name2, 'color'=>$play_color2]
-                                                    ],
+                                    'opponent' =>    [
+                                        'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                                        'args' => ['opponent_name' => $play_name2, 'color' => $play_color2]
+                                    ],
 
                                     'player_name' => $winner_name,
                                     'icon' => $iconloot,
-                                    
+
                                 )
-                                );
+                            );
                         }
                     }
                 }
@@ -968,8 +965,8 @@ class Game extends \Table
         $cards = $this->getGameStateValue("round_max_bid");
 
         foreach ($players as $player) {
-            
-            
+
+
             $bid = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$player}'");
             $tricks = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$player}'");
 
@@ -986,7 +983,7 @@ class Game extends \Table
             }
 
             if ($tricks != $bid) {
-                
+
                 $bonus_rascal = self::getUniqueValueFromDB("SELECT player_bonus_rascal FROM player WHERE player_id = '{$player}'");
                 $bonus_vp = $bonus_trick - $bonus_rascal;
             }
@@ -1015,7 +1012,7 @@ class Game extends \Table
                 }
             }
 
-           
+
             $total_round = $tricks_vp + $bonus_vp;
 
 
@@ -1037,7 +1034,7 @@ class Game extends \Table
 
         $round = $this->getGameStateValue("round_nb");
 
-        if (($play1 != 0)&&($win1 != 0)) {
+        if (($play1 != 0) && ($win1 != 0)) {
             $bid1 = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$play1}'");
             $tricks1 = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$play1}'");
             $bid2 = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$win1}'");
@@ -1051,7 +1048,7 @@ class Game extends \Table
             }
         }
 
-        if (($play2 != 0)&&($win2 != 0)) {
+        if (($play2 != 0) && ($win2 != 0)) {
             $bid1 = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$play2}'");
             $tricks1 = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$play2}'");
             $bid2 = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$win2}'");
@@ -1082,8 +1079,7 @@ class Game extends \Table
             );
 
             // STATS
-            game::$instance->incStat($score_round, 'total_round_'.$round, $player);
-
+            game::$instance->incStat($score_round, 'total_round_' . $round, $player);
         }
 
 
@@ -1119,10 +1115,9 @@ class Game extends \Table
             $bonustrick = self::getUniqueValueFromDB("SELECT bonus_trick FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
             array_push($scoringdialog_bonustrick, $bonustrick);
             $bonusrascal = self::getUniqueValueFromDB("SELECT bonus_rascal FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
-                if($bonusrascal != 0)
-                {
-                    $bonusrascal = '+/- '.$bonusrascal;
-                }
+            if ($bonusrascal != 0) {
+                $bonusrascal = '+/- ' . $bonusrascal;
+            }
             array_push($scoringdialog_bonusrascal, $bonusrascal);
             $bonusloot = self::getUniqueValueFromDB("SELECT bonus_loot FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
             array_push($scoringdialog_bonusloot, $bonusloot);
@@ -1133,9 +1128,6 @@ class Game extends \Table
                 'args' => ['player_name' => $player["player_name"]],
                 'type' => 'header'
             ]);
-
-        
-
         }
 
         $table = [
@@ -1151,25 +1143,20 @@ class Game extends \Table
             $scoringdialog_total,
         ];
 
-        
+
         $this->notifyAllPlayers("tableWindow", '', array(
             "id" => 'finalScoring',
-            "title" => clienttranslate("Round").' '.$round,
+            "title" => clienttranslate("Round") . ' ' . $round,
             "table" => $table,
             "closing" => clienttranslate("Close")
         ));
 
-        
-        self::notifyAllPlayers( 'simplePause', '', [ 'time' => 3000] );
 
-
-
-
-
+        self::notifyAllPlayers('simplePause', '', ['time' => 3000]);
     }
 
 
-     /// LOGS
+    /// LOGS
 
     function getLogsType($card_id)
     {
@@ -1177,33 +1164,20 @@ class Game extends \Table
         $card_type = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_id='{$card_id}'");
         $card_type_arg = intval(self::getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_id='{$card_id}'"));
 
-        
-        if ($card_type == 'green')
-        {
+
+        if ($card_type == 'green') {
             $type = 100;
             $type = $type + $card_type_arg;
-        }
-
-        elseif ($card_type == 'purple')
-        {
+        } elseif ($card_type == 'purple') {
             $type = 200;
             $type = $type + $card_type_arg;
-        }
-
-        elseif ($card_type == 'yellow')
-        {
+        } elseif ($card_type == 'yellow') {
             $type = 300;
             $type = $type + $card_type_arg;
-        }
-
-        elseif ($card_type == 'black')
-        {
+        } elseif ($card_type == 'black') {
             $type = 400;
             $type = $type + $card_type_arg;
-        }
-
-        else
-        {
+        } else {
             $type = 500;
         }
 
@@ -1211,237 +1185,186 @@ class Game extends \Table
 
         if (($type > 100) && ($type < 200)) {
             $dizaine_et_unite = $type % 100;
-            $variable = ($dizaine_et_unite-1)*-100;
-            
+            $variable = ($dizaine_et_unite - 1) * -100;
+
             return "<div class='icon_log' title='' style='background-position-x: {$variable}%; background-position-y: 0%;'></div>";
-        }
-
-        elseif (($type > 200) && ($type < 300)) {
+        } elseif (($type > 200) && ($type < 300)) {
             $dizaine_et_unite = $type % 100;
-            $variable = ($dizaine_et_unite-1)*-100;
-            
+            $variable = ($dizaine_et_unite - 1) * -100;
+
             return "<div class='icon_log' title='' style='background-position-x: {$variable}%; background-position-y: -100%;'></div>";
-        }
-
-        elseif (($type > 300) && ($type < 400)) {
+        } elseif (($type > 300) && ($type < 400)) {
             $dizaine_et_unite = $type % 100;
-            $variable = ($dizaine_et_unite-1)*-100;
-            
+            $variable = ($dizaine_et_unite - 1) * -100;
+
             return "<div class='icon_log' title='' style='background-position-x: {$variable}%; background-position-y: -200%;'></div>";
-        }
-
-        elseif (($type > 400) && ($type < 500)) {
+        } elseif (($type > 400) && ($type < 500)) {
             $dizaine_et_unite = $type % 100;
-            $variable = ($dizaine_et_unite-1)*-100;
-            
-            return "<div class='icon_log' title='' style='background-position-x: {$variable}%; background-position-y: -300%;'></div>";
-        }
+            $variable = ($dizaine_et_unite - 1) * -100;
 
-        else
-        {
-            if ($card_type == 'pirate')
-            {
+            return "<div class='icon_log' title='' style='background-position-x: {$variable}%; background-position-y: -300%;'></div>";
+        } else {
+            if ($card_type == 'pirate') {
                 return "<div class='icon_log' title='' style='background-position-x: 0%; background-position-y: -400%;'></div>";
             }
 
-            if ($card_type == 'mermaid')
-            {
+            if ($card_type == 'mermaid') {
                 return "<div class='icon_log' title='' style='background-position-x: -200%; background-position-y: -400%;'></div>";
             }
 
-            if ($card_type == 'escape')
-            {
+            if ($card_type == 'escape') {
                 return "<div class='icon_log' title='' style='background-position-x: -100%; background-position-y: -400%;'></div>";
             }
 
-            if ($card_type == 'skull_king')
-            {
+            if ($card_type == 'skull_king') {
                 return "<div class='icon_log' title='' style='background-position-x: -300%; background-position-y: -400%;'></div>";
             }
 
-            if ($card_type == 'tigress')
-            {
+            if ($card_type == 'tigress') {
                 if (game::$instance->getGameStateValue("tigress_role") == 1) {
                     return "<div class='icon_log' title='' style='background-position-x: 0%; background-position-y: -400%;'></div>";
                 }
                 if (game::$instance->getGameStateValue("tigress_role") == 2) {
                     return "<div class='icon_log' title='' style='background-position-x: -100%; background-position-y: -400%;'></div>";
                 }
-                
             }
 
-            if ($card_type == 'kraken')
-            {
+            if ($card_type == 'kraken') {
                 return "<div class='icon_log' title='' style='background-position-x: -400%; background-position-y: -400%;'></div>";
             }
 
-            if ($card_type == 'white_whale')
-            {
+            if ($card_type == 'white_whale') {
                 return "<div class='icon_log' title='' style='background-position-x: -500%; background-position-y: -400%;'></div>";
             }
 
-            if ($card_type == 'loot')
-            {
+            if ($card_type == 'loot') {
                 return "<div class='icon_log' title='' style='background-position-x: -600%; background-position-y: -400%;'></div>";
             }
-        
-        
         }
-        
-       
     }
 
     function getLogsSpecial($type)
     {
-        if($type ==  'kraken')
-        {
+        if ($type ==  'kraken') {
             return "<div class='icon_log' title='' style='background-position-x: -400%; background-position-y: -400%;'></div>";
         }
 
-        if($type == 'white_whale')
-        {
+        if ($type == 'white_whale') {
             return "<div class='icon_log' title='' style='background-position-x: -500%; background-position-y: -400%;'></div>";
         }
-               
-       
     }
 
     function logBonus($bonus)
     {
         $count = count($bonus);
 
-        if($count >=2)
-        {
+        if ($count >= 2) {
             $player_id = $bonus[0];
-            $player_name= self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$player_id}'");
+            $player_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$player_id}'");
 
             array_shift($bonus);
-            foreach($bonus as $info)
-            {
-                if($info == 1)
-                {
+            foreach ($bonus as $info) {
+                if ($info == 1) {
                     $log = "<div class='icon_log' title='' style='background-position-x: -1300%; background-position-y: 0%;'></div>";
                     game::$instance->notifyAllPlayers(
-                    'message',
-                    clienttranslate('${player_name} wins ${log} <b>(+10 Bonus)</b>'),
-                    array(
-                        'player_name' => $player_name,
-                        'log' => $log,
+                        'message',
+                        clienttranslate('${player_name} wins ${log} <b>(+10 Bonus)</b>'),
+                        array(
+                            'player_name' => $player_name,
+                            'log' => $log,
 
-                    )
+                        )
                     );
-
                 }
 
-                if($info == 2)
-                {
+                if ($info == 2) {
                     $log = "<div class='icon_log' title='' style='background-position-x: -1300%; background-position-y: -100%;'></div>";
                     game::$instance->notifyAllPlayers(
-                    'message',
-                    clienttranslate('${player_name} wins ${log} <b>(+10 Bonus)</b>'),
-                    array(
-                        'player_name' => $player_name,
-                        'log' => $log,
+                        'message',
+                        clienttranslate('${player_name} wins ${log} <b>(+10 Bonus)</b>'),
+                        array(
+                            'player_name' => $player_name,
+                            'log' => $log,
 
-                    )
+                        )
                     );
-
                 }
 
-                if($info == 3)
-                {
+                if ($info == 3) {
                     $log = "<div class='icon_log' title='' style='background-position-x: -1300%; background-position-y: -200%;'></div>";
                     game::$instance->notifyAllPlayers(
-                    'message',
-                    clienttranslate('${player_name} wins ${log} <b>(+10 Bonus)</b>'),
-                    array(
-                        'player_name' => $player_name,
-                        'log' => $log,
+                        'message',
+                        clienttranslate('${player_name} wins ${log} <b>(+10 Bonus)</b>'),
+                        array(
+                            'player_name' => $player_name,
+                            'log' => $log,
 
-                    )
+                        )
                     );
-
                 }
 
-                if($info == 4)
-                {
+                if ($info == 4) {
                     $log = "<div class='icon_log' title='' style='background-position-x: -1300%; background-position-y: -300%;'></div>";
                     game::$instance->notifyAllPlayers(
-                    'message',
-                    clienttranslate('${player_name} wins ${log} <b>(+20 Bonus)</b>'),
-                    array(
-                        'player_name' => $player_name,
-                        'log' => $log,
+                        'message',
+                        clienttranslate('${player_name} wins ${log} <b>(+20 Bonus)</b>'),
+                        array(
+                            'player_name' => $player_name,
+                            'log' => $log,
 
-                    )
+                        )
                     );
-
                 }
 
-                if($info == 5)
-                {
+                if ($info == 5) {
                     $log = "<div class='icon_log' title='' style='background-position-x: 0%; background-position-y: -400%;'></div>";  //pirate
                     $log1 = "<div class='icon_log' title='' style='background-position-x: -200%; background-position-y: -400%;'></div>"; //sirene
                     game::$instance->notifyAllPlayers(
-                    'message',
-                    clienttranslate('${player_name} captures ${log1} with ${log} <b>(+20 Bonus)</b>'),
-                    array(
-                        'player_name' => $player_name,
-                        'log1' => $log1,
-                        'log' => $log,
+                        'message',
+                        clienttranslate('${player_name} captures ${log1} with ${log} <b>(+20 Bonus)</b>'),
+                        array(
+                            'player_name' => $player_name,
+                            'log1' => $log1,
+                            'log' => $log,
 
-                    )
+                        )
                     );
-
                 }
 
-                if($info == 6)
-                {
+                if ($info == 6) {
                     $log = "<div class='icon_log' title='' style='background-position-x: 0%; background-position-y: -400%;'></div>";  //pirate
                     $log1 = "<div class='icon_log' title='' style='background-position-x: -300%; background-position-y: -400%;'></div>"; //skull
                     game::$instance->notifyAllPlayers(
-                    'message',
-                    clienttranslate('${player_name} captures ${log} with ${log1} <b>(+30 Bonus)</b>'),
-                    array(
-                        'player_name' => $player_name,
-                        'log1' => $log1,
-                        'log' => $log,
+                        'message',
+                        clienttranslate('${player_name} captures ${log} with ${log1} <b>(+30 Bonus)</b>'),
+                        array(
+                            'player_name' => $player_name,
+                            'log1' => $log1,
+                            'log' => $log,
 
-                    )
+                        )
                     );
-
                 }
 
-                if($info == 7)
-                {
+                if ($info == 7) {
                     $log = "<div class='icon_log' title='' style='background-position-x: -200%; background-position-y: -400%;'></div>"; //sirene
                     $log1 = "<div class='icon_log' title='' style='background-position-x: -300%; background-position-y: -400%;'></div>"; //skull
                     game::$instance->notifyAllPlayers(
-                    'message',
-                    clienttranslate('${player_name} captures ${log1} with ${log} <b>(+40 Bonus)</b>'),
-                    array(
-                        'player_name' => $player_name,
-                        'log1' => $log1,
-                        'log' => $log,
+                        'message',
+                        clienttranslate('${player_name} captures ${log1} with ${log} <b>(+40 Bonus)</b>'),
+                        array(
+                            'player_name' => $player_name,
+                            'log1' => $log1,
+                            'log' => $log,
 
-                    )
+                        )
                     );
-
                 }
-
-
-
-
-
-
             }
-          
         }
-
-
     }
 
-    
+
 
     ///////////////////////////////////////////////////////////////////////////////// 
     //     _____  _                                    _   _                 
@@ -1528,20 +1451,16 @@ class Game extends \Table
     #[CheckAction(false)]
     public function actShowLastScore(int $arg1)
     {
-        
-        $currentplayer_id = $this->getCurrentPlayerId();
-        if($arg1 == 0)
-        {
-            $round = $this->getGameStateValue("round_nb");
-        }
 
-        else
-        {
+        $currentplayer_id = $this->getCurrentPlayerId();
+        if ($arg1 == 0) {
+            $round = $this->getGameStateValue("round_nb");
+        } else {
             $round = $arg1;
         }
 
-        
-        
+
+
         $scoringdialog_playernames = [''];
         $scoringdialog_cards = array(clienttranslate("Cards Played"));
         $scoringdialog_bid = array(clienttranslate("Bid"));
@@ -1556,128 +1475,106 @@ class Game extends \Table
 
         $player_info = $this->loadPlayersBasicInfos();
 
-        $bid_not_validated = self::getObjectListFromDB( "SELECT player_id id FROM player WHERE player_bid_validated = 0", true );
+        $bid_not_validated = self::getObjectListFromDB("SELECT player_id id FROM player WHERE player_bid_validated = 0", true);
 
-        if($round < $this->getGameStateValue("round_nb"))
-        {
-
-            foreach ($player_info as $player) {
-
-            $cards = self::getUniqueValueFromDB("SELECT cards FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
-            array_push($scoringdialog_cards, $cards);
-            $bid = self::getUniqueValueFromDB("SELECT bid FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
-            array_push($scoringdialog_bid, $bid);
-            $trick = self::getUniqueValueFromDB("SELECT tricks FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
-            array_push($scoringdialog_trick, $trick);
-            $trick_vp = self::getUniqueValueFromDB("SELECT tricks_vp FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
-            array_push($scoringdialog_trick_vp, $trick_vp);
-            $bonus = self::getUniqueValueFromDB("SELECT bonus_vp FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
-            array_push($scoringdialog_bonus, $bonus);
-            $total = self::getUniqueValueFromDB("SELECT total_round FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
-            array_push($scoringdialog_total, $total);
-
-            $bonustrick = self::getUniqueValueFromDB("SELECT bonus_trick FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
-            array_push($scoringdialog_bonustrick, $bonustrick);
-            $bonusrascal = self::getUniqueValueFromDB("SELECT bonus_rascal FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
-                if($bonusrascal != 0)
-                {
-                    $bonusrascal = '+/- '.$bonusrascal;
-                }
-            array_push($scoringdialog_bonusrascal, $bonusrascal);
-            $bonusloot = self::getUniqueValueFromDB("SELECT bonus_loot FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
-            array_push($scoringdialog_bonusloot, $bonusloot);
-
-            array_push($scoringdialog_playernames, [
-            'str' => '${player_name}',
-            'args' => ['player_name' => $player["player_name"]],
-            'type' => 'header'
-            ]);
-
-            }
-        }
-
-        if($round == $this->getGameStateValue("round_nb"))
-        {
-
-            
+        if ($round < $this->getGameStateValue("round_nb")) {
 
             foreach ($player_info as $player) {
 
-            $cards = "-";
-            array_push($scoringdialog_cards, $cards);
+                $cards = self::getUniqueValueFromDB("SELECT cards FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                array_push($scoringdialog_cards, $cards);
+                $bid = self::getUniqueValueFromDB("SELECT bid FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                array_push($scoringdialog_bid, $bid);
+                $trick = self::getUniqueValueFromDB("SELECT tricks FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                array_push($scoringdialog_trick, $trick);
+                $trick_vp = self::getUniqueValueFromDB("SELECT tricks_vp FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                array_push($scoringdialog_trick_vp, $trick_vp);
+                $bonus = self::getUniqueValueFromDB("SELECT bonus_vp FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                array_push($scoringdialog_bonus, $bonus);
+                $total = self::getUniqueValueFromDB("SELECT total_round FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                array_push($scoringdialog_total, $total);
 
-            if($bid_not_validated != null)
-            {
-                $bid = "-";
-            }
-            else
-            {
-                $bid = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$player["player_id"]}'");
-            }
-            array_push($scoringdialog_bid, $bid);
-
-            if($bid_not_validated != null)
-            {
-                $trick = "-";
-            }
-            else
-            {
-                $trick = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$player["player_id"]}'");
-            }
-            array_push($scoringdialog_trick, $trick);
-
-            $trick_vp = "-";
-            array_push($scoringdialog_trick_vp, $trick_vp);
-            $bonus = "-";
-            array_push($scoringdialog_bonus, $bonus);
-            $total = "-";
-            array_push($scoringdialog_total, $total);
-
-            if($bid_not_validated != null)
-            {
-                $bonustrick = "-";
-            }
-            else
-            {
-                $bonustrick = self::getUniqueValueFromDB("SELECT player_bonus_trick FROM player WHERE player_id = '{$player["player_id"]}'");
-            }
-            array_push($scoringdialog_bonustrick, $bonustrick);
-
-            if($bid_not_validated != null)
-            {
-                $bonusrascal = "-";
-            }
-            else
-            {
-                $bonusrascal = self::getUniqueValueFromDB("SELECT player_bonus_rascal FROM player WHERE player_id = '{$player["player_id"]}'");
-                if($bonusrascal != 0)
-                {
-                    $bonusrascal = '+/- '.$bonusrascal;
+                $bonustrick = self::getUniqueValueFromDB("SELECT bonus_trick FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                array_push($scoringdialog_bonustrick, $bonustrick);
+                $bonusrascal = self::getUniqueValueFromDB("SELECT bonus_rascal FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                if ($bonusrascal != 0) {
+                    $bonusrascal = '+/- ' . $bonusrascal;
                 }
-            }
-            array_push($scoringdialog_bonusrascal, $bonusrascal);
+                array_push($scoringdialog_bonusrascal, $bonusrascal);
+                $bonusloot = self::getUniqueValueFromDB("SELECT bonus_loot FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                array_push($scoringdialog_bonusloot, $bonusloot);
 
-            if($bid_not_validated != null)
-            {
-                $bonusloot = "-";
+                array_push($scoringdialog_playernames, [
+                    'str' => '${player_name}',
+                    'args' => ['player_name' => $player["player_name"]],
+                    'type' => 'header'
+                ]);
             }
-            else
-            {
-                $bonusloot = self::getUniqueValueFromDB("SELECT player_bonus_loot FROM player WHERE player_id = '{$player["player_id"]}'");
-            }
-            array_push($scoringdialog_bonusloot, $bonusloot);
-
-            array_push($scoringdialog_playernames, [
-            'str' => '${player_name}',
-            'args' => ['player_name' => $player["player_name"]],
-            'type' => 'header'
-            ]);
-
-            }
-
         }
 
-        
+        if ($round == $this->getGameStateValue("round_nb")) {
+
+
+
+            foreach ($player_info as $player) {
+
+                $cards = "-";
+                array_push($scoringdialog_cards, $cards);
+
+                if ($bid_not_validated != null) {
+                    $bid = "-";
+                } else {
+                    $bid = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$player["player_id"]}'");
+                }
+                array_push($scoringdialog_bid, $bid);
+
+                if ($bid_not_validated != null) {
+                    $trick = "-";
+                } else {
+                    $trick = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$player["player_id"]}'");
+                }
+                array_push($scoringdialog_trick, $trick);
+
+                $trick_vp = "-";
+                array_push($scoringdialog_trick_vp, $trick_vp);
+                $bonus = "-";
+                array_push($scoringdialog_bonus, $bonus);
+                $total = "-";
+                array_push($scoringdialog_total, $total);
+
+                if ($bid_not_validated != null) {
+                    $bonustrick = "-";
+                } else {
+                    $bonustrick = self::getUniqueValueFromDB("SELECT player_bonus_trick FROM player WHERE player_id = '{$player["player_id"]}'");
+                }
+                array_push($scoringdialog_bonustrick, $bonustrick);
+
+                if ($bid_not_validated != null) {
+                    $bonusrascal = "-";
+                } else {
+                    $bonusrascal = self::getUniqueValueFromDB("SELECT player_bonus_rascal FROM player WHERE player_id = '{$player["player_id"]}'");
+                    if ($bonusrascal != 0) {
+                        $bonusrascal = '+/- ' . $bonusrascal;
+                    }
+                }
+                array_push($scoringdialog_bonusrascal, $bonusrascal);
+
+                if ($bid_not_validated != null) {
+                    $bonusloot = "-";
+                } else {
+                    $bonusloot = self::getUniqueValueFromDB("SELECT player_bonus_loot FROM player WHERE player_id = '{$player["player_id"]}'");
+                }
+                array_push($scoringdialog_bonusloot, $bonusloot);
+
+                array_push($scoringdialog_playernames, [
+                    'str' => '${player_name}',
+                    'args' => ['player_name' => $player["player_name"]],
+                    'type' => 'header'
+                ]);
+            }
+        }
+
+
 
 
 
@@ -1694,23 +1591,19 @@ class Game extends \Table
             $scoringdialog_total,
         ];
 
-        $this->notifyPlayer($currentplayer_id,"tableWindow", '', array(
-            
+        $this->notifyPlayer($currentplayer_id, "tableWindow", '', array(
+
             "id" => 'finalScoring',
-            "title" => clienttranslate("Round").' '.$round,
+            "title" => clienttranslate("Round") . ' ' . $round,
             "table" => $table,
             "closing" => clienttranslate("Close")
         ));
 
-        $this->notifyPlayer($currentplayer_id,"scoreButton", '', array(
+        $this->notifyPlayer($currentplayer_id, "scoreButton", '', array(
             "round" => $this->getGameStateValue("round_nb"),
             "viewround" => $round,
-           
+
         ));
-
-    
-
-        
     }
 
 
@@ -1879,16 +1772,18 @@ class Game extends \Table
             );
         }
 
-        game::$instance->notifyAllPlayers(
-            'message',
-            clienttranslate('${message}'),
-            array(
-                'message' =>  [  'log' => '<div class = "notif_newRound">${round} ${nb}/10</div>',
-                                'args'=> ['round' => clienttranslate('Round'), 'nb'=>$new_round_nb, 'i18n' => ['round'] ]
-                            ],
-            
-            )
-        );
+
+        game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newRound">${round} ${nb}/10</div>',
+                'args' => [
+                    'round' => clienttranslate('Round'),
+                    'nb' => $new_round_nb,
+                    'i18n' => ['round']
+                ],
+                'type' => 'newRound'
+            ]
+        ]);
 
 
 
@@ -1904,7 +1799,7 @@ class Game extends \Table
             array()
         );
 
-        
+
 
         $bids = self::getObjectListFromDB("SELECT player_id id, player_bid bid, player_tricks tricks FROM player");
 
