@@ -484,7 +484,7 @@ class Game extends \Table
             $requested_color_name = $color[$requested_color_nb - 1];
         }
 
-        $ordre_players[] = $first_player_trick;
+        $ordre_players[] = intval($first_player_trick);
         $next = game::$instance->getPlayerAfter($first_player_trick);
         $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
         for ($i = 1; $i <= $count_players - 1; $i++) {
@@ -493,6 +493,7 @@ class Game extends \Table
             $next = game::$instance->getPlayerAfter($next);
         }
 
+        
 
         foreach ($ordre_players as $player) {
             $type = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_location_arg = '{$player}'");
@@ -523,6 +524,7 @@ class Game extends \Table
                 game::$instance->setGameStateValue("kraken", 0);
             }
 
+
             if ($type == 'tigress') {
                 if (game::$instance->getGameStateValue("tigress_role") == 1) {
                     $ordre_card_type[] = 'pirate';
@@ -532,16 +534,17 @@ class Game extends \Table
                 }
             }
 
-            if ($type == 'loot') {
+            elseif ($type == 'loot') {
                 $ordre_card_type[] = 'escape';
-            } else {
+            } 
+            
+            else {
                 $ordre_card_type[] = $type;
             }
         }
 
 
-
-
+        
         $index = array_search('pirate', $ordre_card_type);
         if ($index !== false) {
             $first_pirate = $ordre_players[$index];
