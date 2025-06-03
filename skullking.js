@@ -1880,8 +1880,11 @@ notif_yohoho: async function(args) {
     notif_removeIconScore: function()
     {
         const element = document.getElementById('icon_score');
-        element.remove();
-       
+        if((element)&&(!this.isSpectator))
+        {
+            element.remove();
+        }
+      
     },
 
 
