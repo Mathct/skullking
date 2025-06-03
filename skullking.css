@@ -605,6 +605,10 @@ font-family: "GothamMedium";
 	width: 100%;
 	text-align: center;
 	text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  /*unicode-bidi: plaintext;*/
 }
 
 .stockitem .border {
