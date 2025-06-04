@@ -274,6 +274,20 @@ font-family: "GothamMedium";
   
 }
 
+.notif_newTurn {
+  background: #4d4d4d;
+  text-align: center;
+  color: #efd5ab;
+  border: 1px solid black;
+  font-weight: bold;
+  padding: 5px 2px 2px;
+  font-size: 24px;
+  font-family: "GothamMedium";
+  display: block;
+  position: relative; 
+  
+}
+
 
 /* Conteneur principal */
 #resized_id {

@@ -18,7 +18,7 @@ $this->_SPECIAL_CARDS = [
     "skull_king" => [
         "name" => clienttranslate('Skull King (x1)'),
         "desc_1" => clienttranslate('The scourge of the seas is the trump of Pirates and beats all numbered cards and Pirates (including the Tigress, when played as a Pirate). The only ones who can defeat him are the Mermaids, luring him into the sea with their precious treasure.'),
-        "desc_2" => clienttranslate('If a Pirate, the Skull King; and a Mermaid are all played in the same trick, the Mermaid always wins the trick, regardless of order of play. Only the Mermaid capturing the Skull King binus is earned. ')
+        "desc_2" => clienttranslate('If a Pirate, the Skull King; and a Mermaid are all played in the same trick, the Mermaid always wins the trick, regardless of order of play. Only the Mermaid capturing the Skull King bonus is earned. ')
     ],
     "mermaid" => [
         "name" => clienttranslate('Mermaid (x2)'),
@@ -33,7 +33,7 @@ $this->_SPECIAL_CARDS = [
     "pirate" => [
         "name" => clienttranslate('Pirate (x5)'),
         "desc_1" => clienttranslate('Pirate cards beat all numbered cards. They are of equal rank with each other, so if more than one Pirate card is played in a trick, the person who played the first pirate wins the trick.'),
-        "desc_2" => clienttranslate('If a Pirate, the Skull King; and a Mermaid are all played in the same trick, the Mermaid always wins the trick, regardless of order of play. Only the Mermaid capturing the Skull King binus is earned. ')
+        "desc_2" => clienttranslate('If a Pirate, the Skull King; and a Mermaid are all played in the same trick, the Mermaid always wins the trick, regardless of order of play. Only the Mermaid capturing the Skull King bonus is earned. ')
     ],
     "loot" => [
         "name" => clienttranslate('Loot( x2)'),

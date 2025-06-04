@@ -1816,6 +1816,19 @@ class Game extends \Table
 
 
         self::notifyAllPlayers('simplePause', '', ['time' => 1500]);
+
+        game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+        ]);
+
+
         $this->gamestate->nextState('next');
     }
 

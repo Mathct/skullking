@@ -1249,26 +1249,10 @@ setupTooltips:function () {
 },
 
 onScreenWidthChange: function () {
-    this.updateLayout(); // NE PAS SUPPRIMER, nécessaire dams le mode instantaneous de Tisaac
 },
 
-updateLayout: function() {
-    /*        var gameWidth = TABLE_WIDTH;
-        var gameHeight = TABLE_HEIGHT;
 
-        var horizontalScale = document.getElementById('game_play_area').clientWidth / gameWidth;
-        var verticalScale = (window.innerHeight - 0) / gameHeight;
-
-        var scale = Math.min(1, horizontalScale, verticalScale);
-
-        var resized_div = document.getElementById('resized_id');
-        var play_area_height = dojo.marginBox("board_id").h;
-
-        resized_div.style.transform = scale === 1 ? '' : "scale(".concat(scale, ")");
-
-        dojo.style("resized_id",'height', (play_area_height*scale)+'px'); */ 
-},
-
+/* THOUN HELP BUTTON*/
 
 addHelp: function() {
     // Créer l'élément bouton
@@ -1466,24 +1450,8 @@ showDeckModal: function() {
     });
 },
 
-/*animateAndRemoveToken: function(token_css) {
+/* THOUN HELP BUTTON*/
 
-    return new Promise((resolve) => {
-        const tokenElement = document.getElementById(token_css);
-        if (!tokenElement) {
-            resolve(); // Si l'élément n'existe pas, on termine la promesse
-            return;
-        }
-
-        // Ajouter l'animation CSS
-        tokenElement.classList.add("sprite-disappear");
-
-        tokenElement.addEventListener("animationend", () => {
-            //tokenElement.remove();
-            resolve(); // La promesse est terminée
-        }, { once: true }); // `once: true` pour éviter plusieurs déclenchements
-    });
-},*/
 
 animateAndRemoveCard: function(token_css) {
     const tokenElement = document.getElementById(token_css);
@@ -1756,7 +1724,7 @@ notif_majBidHarry: async function(args) {
 
 notif_yohoho: async function(args) {
 
-    if(this.getGameUserPreference(102) == 1)
+    if(this.getGameUserPreference(102) == 1  && this.bgaAnimationsActive())
     {
 
         dojo.removeClass('yohoho_container', 'hidden');
@@ -1858,22 +1826,22 @@ notif_yohoho: async function(args) {
 
         if(card){
 
-        if(args.role == 1)
-        {
-        const icon = document.createElement('div');
-        icon.id = 'icon_tigress';
-        icon.className = 'pirate_icon';
-        card.appendChild(icon);
-        }
+            if(args.role == 1)
+            {
+                const icon = document.createElement('div');
+                icon.id = 'icon_tigress';
+                icon.className = 'pirate_icon';
+                card.appendChild(icon);
+            }
 
-        if(args.role == 2)
-        {
-        const icon = document.createElement('div');
-        icon.id = 'icon_tigress';
-        icon.className = 'escape_icon';
-        card.appendChild(icon);
+            if(args.role == 2)
+            {
+                const icon = document.createElement('div');
+                icon.id = 'icon_tigress';
+                icon.className = 'escape_icon';
+                card.appendChild(icon);
+            }
         }
-    }
         
     },
 

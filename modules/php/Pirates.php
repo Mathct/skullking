@@ -104,6 +104,18 @@ trait PiratesTrait  // ATTENTION
                 '',
                 array()
             );
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
+
         }
 
         if ($this->player_pref_confirm == 2) {
@@ -183,6 +195,18 @@ trait PiratesTrait  // ATTENTION
                 '',
                 array()
             );
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
+
         }
     }
 
@@ -278,6 +302,18 @@ trait PiratesTrait  // ATTENTION
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
                 $nextplayer = game::$instance->getPlayerAfter($nextplayer);
             }
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
+
         }
 
         if ($this->player_pref_confirm == 2) {
@@ -313,7 +349,6 @@ trait PiratesTrait  // ATTENTION
 
         if ($varg1 == 'yes') {
 
-            // ici le $varg1 n'est pas l'id du bouton mais la selection générée par le actValidate (voir game.php)
             $ids = explode('_', $parg1);
             $cards = array();
             $player_id = $this->player_id;
@@ -346,6 +381,17 @@ trait PiratesTrait  // ATTENTION
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
                 $nextplayer = game::$instance->getPlayerAfter($nextplayer);
             }
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
         }
     }
 
@@ -420,6 +466,18 @@ trait PiratesTrait  // ATTENTION
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
                 $nextplayer = game::$instance->getPlayerAfter($nextplayer);
             }
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
+
         }
 
         if ($this->player_pref_confirm == 2) {
@@ -477,6 +535,18 @@ trait PiratesTrait  // ATTENTION
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
                 $nextplayer = game::$instance->getPlayerAfter($nextplayer);
             }
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
+
         }
     }
 
@@ -546,6 +616,18 @@ trait PiratesTrait  // ATTENTION
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
                 $nextplayer = game::$instance->getPlayerAfter($nextplayer);
             }
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
+
         }
         if ($this->player_pref_confirm == 2) {
             game::$instance->addPending($this->player_id, "Power4_Step2_Confirm", $parg1);
@@ -595,6 +677,18 @@ trait PiratesTrait  // ATTENTION
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
                 $nextplayer = game::$instance->getPlayerAfter($nextplayer);
             }
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
+
         }
     }
 
@@ -721,6 +815,18 @@ trait PiratesTrait  // ATTENTION
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
                 $nextplayer = game::$instance->getPlayerAfter($nextplayer);
             }
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
+
         }
 
         if ($this->player_pref_confirm == 2) {
@@ -798,6 +904,18 @@ trait PiratesTrait  // ATTENTION
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
                 $nextplayer = game::$instance->getPlayerAfter($nextplayer);
             }
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
+
         }
     }
 

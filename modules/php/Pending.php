@@ -731,7 +731,21 @@ class Pending extends APP_GameClass
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
                 $nextplayer = game::$instance->getPlayerAfter($nextplayer);
             }
+
+            game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
+            'message' => [
+                'log' => '<div class="notif_newTurn">${turn}</div>',
+                'args' => [
+                    'turn' => clienttranslate('New Turn'),
+                    'i18n' => ['turn']
+                ],
+                'type' => 'newRound'
+            ]
+            ]);
+            
         }
+
+        
     }
 
 
