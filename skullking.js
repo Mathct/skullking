@@ -1369,10 +1369,10 @@ showHelpModal: function() {
             </div>`;
         html += `<div class="info_container">`;        
         html += "<div class='tooltip_subtitle'>"+_('white whale')+"</div>";
-        html += "<div class='tooltip_desc'>"+_('High number wins. Suis and special card don\'t matter.')+"</div>";
+        html += "<div class='tooltip_desc'>"+_('High number wins. Suits and special card don\'t matter.')+"</div>";
         html += "</div></div>";
 
-        html += "<div class='tooltip_desc'>"+_('<i>When the Kraken and White Whale are played in the same trick, onlt the second beast\'s effect applies. The first is defeated and becomes an escape card.</i>')+"</div>";
+        html += "<div class='tooltip_desc'>"+_('<i>When the Kraken and White Whale are played in the same trick, only the second beast\'s effect applies. The first is defeated and becomes an escape card.</i>')+"</div>";
 
         html += "<div class='tooltip_icon_container'>";
         html += `<div class="icon_container">
@@ -1383,7 +1383,7 @@ showHelpModal: function() {
         html += "<div class='tooltip_desc'>"+_('Form an allaince between you and anther player.')+"</div>";
         html += "</div></div>";
 
-        html += "<div class='tooltip_desc'>"+_('<i>Playing a loot card enters you into an allaince with the player who captures it. If both of you bid correctly, you are each awarded 20 bonus points.</i>')+"</div>";
+        html += "<div class='tooltip_desc'>"+_('<i>Playing a loot card enters you into an alliance with the player who captures it. If both of you bid correctly, you are each awarded 20 bonus points.</i>')+"</div>";
 
 
 
