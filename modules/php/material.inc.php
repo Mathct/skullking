@@ -37,17 +37,17 @@ $this->_SPECIAL_CARDS = [
     ],
     "loot" => [
         "name" => clienttranslate('Loot( x2)'),
-        "desc_1" => clienttranslate('Time to get yerself some treasure me hearties! When you play a loot card, you enter into an alliance with the player who captures it. If both of you bid correctly, you are each awarded 20 bonus points.'),
+        "desc_1" => clienttranslate('When you play a loot card, you enter into an alliance with the player who captures it. If both of you bid correctly, you are each awarded 20 bonus points.'),
         "desc_2" => clienttranslate('If you lead a trick with a loot card and the cards that follow are all escpaes then you would win the trick. No alliance was formed, so no bonus is awarded.')
     ],
     "kraken" => [
         "name" => clienttranslate('Kraken (x1)'),
-        "desc_1" => clienttranslate('Pirates fear nothin\' at all, \'cept fer maybe the Kraken (and their in-laws). When played, the trick is destroyed entirely as the Kraken consumes all. No one wins the trick and the cards are set aside. The next trick is led by the player who would have won the trick. The Kraken and the White Whale are ancient rivals. When played in the same trick the second one played wins the battle. Tat card then sets the action to be applied.'),
+        "desc_1" => clienttranslate('When played, the trick is destroyed entirely as the Kraken consumes all. No one wins the trick and the cards are set aside. The next trick is led by the player who would have won the trick. The Kraken and the White Whale are ancient rivals. When played in the same trick the second one played wins the battle. Tat card then sets the action to be applied.'),
         "desc_2" => clienttranslate('When a Kraken leads a trick, there is no suit for others to follow.')
     ],
     "white_whale" => [
         "name" => clienttranslate('White Whale (x1)'),
-        "desc_1" => clienttranslate('Once hunted by whalers, the White Whale now hunts any vessel that dares cross its path. The White Whale affects both the special suits and numbered suits, in unique ways. The Kraken and the White Whale are ancient rivals. When played in the same trick the second one played wins the battle. Tat card then sets the action to be applied.'),
+        "desc_1" => clienttranslate('When played, special cards are destroyed and can’t win! highest numbered card wins the trick, regardless of the suit. If there is a tie, the first one played is the winner. If only special cards are played, the trick is descarded, and the whale leads the next trick. The Kraken and the White Whale are ancient rivals. When played in the same trick the second one played wins the battle. Tat card then sets the action to be applied.'),
         "desc_2" => clienttranslate('When a White Whale leads a trick, there is no suit for others to follow.')
     ]
 ];
