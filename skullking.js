@@ -1198,7 +1198,7 @@ setupNewCard: function( card_div, card_type_id, card_id ) {
         html += `<br><span class='tooltip_info'>${_(card_desc_2)}</span>`;
 console.log('PIRATE POWER',parseInt(this.gamedatas.pirate_powers_mode));
 
-        if( parseInt(this.gamedatas.pirate_powers_mode) > 0 && card_type_id < 62 ) {
+        if( parseInt(this.gamedatas.pirate_powers_mode) > 1 && card_type_id < 62 ) {
             console.log('PIRATE',this.pirate_cards[card_type_id-56]);
             pirate_name = this.pirate_cards[card_type_id-56].name;
             pirate_ability = this.pirate_cards[card_type_id-56].ability;
