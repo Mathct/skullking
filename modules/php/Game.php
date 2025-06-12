@@ -1271,7 +1271,7 @@ class Game extends \Table
                     $log = "<div class='icon_log' title='' style='background-position-x: -1300%; background-position-y: 0%;'></div>";
                     game::$instance->notifyAllPlayers(
                         'message',
-                        clienttranslate('${player_name} wins ${log} <b>(+10 Bonus)</b>'),
+                        clienttranslate('${player_name} wins the ${log} <b>(+10 Bonus)</b>'),
                         array(
                             'player_name' => $player_name,
                             'log' => $log,
@@ -1284,7 +1284,7 @@ class Game extends \Table
                     $log = "<div class='icon_log' title='' style='background-position-x: -1300%; background-position-y: -100%;'></div>";
                     game::$instance->notifyAllPlayers(
                         'message',
-                        clienttranslate('${player_name} wins ${log} <b>(+10 Bonus)</b>'),
+                        clienttranslate('${player_name} wins the ${log} <b>(+10 Bonus)</b>'),
                         array(
                             'player_name' => $player_name,
                             'log' => $log,
@@ -1297,7 +1297,7 @@ class Game extends \Table
                     $log = "<div class='icon_log' title='' style='background-position-x: -1300%; background-position-y: -200%;'></div>";
                     game::$instance->notifyAllPlayers(
                         'message',
-                        clienttranslate('${player_name} wins ${log} <b>(+10 Bonus)</b>'),
+                        clienttranslate('${player_name} wins the ${log} <b>(+10 Bonus)</b>'),
                         array(
                             'player_name' => $player_name,
                             'log' => $log,
@@ -1310,7 +1310,7 @@ class Game extends \Table
                     $log = "<div class='icon_log' title='' style='background-position-x: -1300%; background-position-y: -300%;'></div>";
                     game::$instance->notifyAllPlayers(
                         'message',
-                        clienttranslate('${player_name} wins ${log} <b>(+20 Bonus)</b>'),
+                        clienttranslate('${player_name} wins the ${log} <b>(+20 Bonus)</b>'),
                         array(
                             'player_name' => $player_name,
                             'log' => $log,
