@@ -1338,7 +1338,7 @@ showHelpModal: function() {
 
         html += "<div class='tooltip_icon_container'>";
           html += `<div class="icon_container">
-                     <div id="sk_icon_toolt_" class="icon" style="background-position:-300% 0%;"></div>
+                     <div id="sk_icon_toolt_" class="icon" style="background-position:-400% 0%;"></div>
                    </div>`;
         html += `<div class="info_container">`;        
         html += "<div class='tooltip_subtitle'>"+_('escapes')+"</div>";
@@ -1347,7 +1347,7 @@ showHelpModal: function() {
         
         html += "<div class='tooltip_icon_container'>";
           html += `<div class="icon_container">
-                     <div id="sk_icon_toolt_" class="icon" style="background-position:-400% 0%;"></div>
+                     <div id="sk_icon_toolt_" class="icon" style="background-position:-300% 0%;"></div>
                    </div>`;
         html += `<div class="info_container">`;        
         html += "<div class='tooltip_subtitle'>"+_('the tigress')+"</div>";
