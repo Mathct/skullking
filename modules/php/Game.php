@@ -1821,7 +1821,7 @@ class Game extends \Table
             'message' => [
                 'log' => '<div class="notif_newTurn">${turn}</div>',
                 'args' => [
-                    'turn' => clienttranslate('New Turn'),
+                    'turn' => clienttranslate('New Trick'),
                     'i18n' => ['turn']
                 ],
                 'type' => 'newRound'
