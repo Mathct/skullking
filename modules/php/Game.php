@@ -367,7 +367,15 @@ class Game extends \Table
     {
         $round = $this->getGameStateValue("round_nb");
 
-        return $round * 10;
+        if(game::$instance->getGameStateValue("end_of_game") == 0)
+        {
+        return ($round-1) * 10;
+        }
+
+        if(game::$instance->getGameStateValue("end_of_game") == 1)
+        {
+        return 100;
+        }
     }
 
 
@@ -1788,8 +1796,7 @@ class Game extends \Table
             ]
         ]);
 
-
-
+        
         game::$instance->gamestate->setAllPlayersMultiactive();
         game::$instance->gamestate->initializePrivateStateForAllActivePlayers();
     }
