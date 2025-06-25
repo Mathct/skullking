@@ -1456,7 +1456,12 @@ showDeckModal: function() {
 animateAndRemoveCard: function(token_css) {
     const tokenElement = document.getElementById(token_css);
 
-    if (!tokenElement) return Promise.resolve();
+    if (!tokenElement) 
+        return Promise.resolve();
+
+    if (this.instantaneousMode) {
+        return Promise.resolve(); // Important pour compatibilité avec `await`
+    }
 
     return new Promise((resolve) => {
         tokenElement.classList.add("sprite-disappear");
@@ -1600,11 +1605,10 @@ notif_drawCards: async function(args) {
 
 
 notif_krakenEffect: async function(args) {
-    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     for (const card of Object.values(args.cards)) { // pas de forEach quand il y a des await
         await this.animateAndRemoveCard(`table_cards_item_${card.id}`); 
-        await delay(200); // Petit délai pour éviter un retrait trop rapide
+        await this.wait(200); // Petit délai pour éviter un retrait trop rapide
     }
 
     await this.tableStock.removeAll();
@@ -1646,11 +1650,10 @@ notif_bendtEffect: async function(args) {
 notif_bendtEffectDone: async function(args) {
   //défausse deux cartes
 
-    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     for (const card of Object.values(args.cards)) { // pas de forEach quand il y a des await
         await this.animateAndRemoveCard(`my_cards_item_${card.id}`); 
-        await delay(200); // Petit délai pour éviter un retrait trop rapide
+        await this.wait(200); // Petit délai pour éviter un retrait trop rapide
         await this.handStock.removeFromStockById(card.id);
     }
 
