@@ -40,31 +40,33 @@ body {
 /* Fonts and Tooltips */
 
   @font-face {
-    font-family: 'PeperoncinoSans';
-    font-style: normal;
-    font-weight: normal;
-    src: local('PeperoncinoSans'), url(img/PeperoncinoSans.otf);
-  }
-
-  @font-face {
     font-family: 'PeperoncinoSansThin400';
     font-style: normal;
     font-weight: normal;
-    src: local('PeperoncinoSansThin400'), url(img/PeperoncinoSansThin400.otf);
+    src: local('PeperoncinoSansThin400'),
+         url('img/PeperoncinoSansThin400.woff2') format('woff2'),
+         url('img/PeperoncinoSansThin400.woff') format('woff'),
+         url('img/PeperoncinoSansThin400.otf') format('opentype');
   }
-
+  
   @font-face {
-    font-family: 'IMFellEnglishSC-Regular';
+    font-family: 'IM_FELL_English_SC';
     font-style: normal;
     font-weight: normal;
-    src: local('IMFellEnglishSC-Regular'), url(img/IMFellEnglishSC-Regular.ttf);
+    src: local('IM_FELL_English_SC'),
+         url('img/IM_FELL_English_SC.woff2') format('woff2'),
+         url('img/IM_FELL_English_SC.woff') format('woff'),
+         url('img/IM_FELL_English_SC.ttf') format('truetype');
   }
-
+  
   @font-face {
     font-family: 'GothamMedium';
     font-style: normal;
     font-weight: normal;
-    src: local('GothamMedium'), url(img/GothamMedium.ttf);
+    src: local('GothamMedium'),
+         url('img/GothamMedium.woff2') format('woff2'),
+         url('img/GothamMedium.woff') format('woff'),
+         url('img/GothamMedium.ttf') format('truetype');
   }
 
 
@@ -85,7 +87,7 @@ body {
 }
 
 .tooltip_bigtitle {
-  font-family: 'GothamMedium';
+  font-family: 'GothamMedium', Montserrat, Raleway, 'Segoe UI', Arial, sans-serif;
   font-size: 24pt;
   /*font-variant: small-caps;*/
   color: #1f3a21;
@@ -93,27 +95,27 @@ body {
     
     
 .tooltip_title {
-  font-family: 'GothamMedium';
+  font-family: 'GothamMedium', Montserrat, Raleway, 'Segoe UI', Arial, sans-serif;
   font-size: 20pt;
   /*font-variant: small-caps;*/
   color: #1f3a21;
 }
 
 .tooltip_subtitle {
-  font-family: 'GothamMedium';
+  font-family: 'GothamMedium', Montserrat, Raleway, 'Segoe UI', Arial, sans-serif;
   font-size: 16pt;
   font-variant: small-caps;
   color: #1f3a21;
 }
 
 .tooltip_desc {
-  font-family: 'PeperoncinoSansThin400';
+  font-family: 'PeperoncinoSansThin400', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
   font-size: 12pt;
   color:#1f3a21;
 }
 
 .tooltip_info {
-  font-family: 'PeperoncinoSansThin400';
+  font-family: 'PeperoncinoSansThin400', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
   font-size: 12pt;
   color:#2a5d9c;
 }
@@ -223,7 +225,7 @@ body {
 
 /* Compteur */
 .icon-text {
-font-family: "GothamMedium";
+  font-family: 'GothamMedium', Montserrat, Raleway, 'Segoe UI', Arial, sans-serif;
   font-size: 16pt;
   line-height: 50px;
 }
@@ -231,7 +233,7 @@ font-family: "GothamMedium";
 
 
 .titre {
-  font-family: "IMFellEnglishSC-Regular";
+  font-family: 'IM_FELL_English_SC', Georgia, 'Times New Roman', Garamond, serif;
   font-size: 20pt;
   font-weight: bold;
   color: #efd5ab;
@@ -240,7 +242,7 @@ font-family: "GothamMedium";
 }
 
 .titre_deck {
-  font-family: "IMFellEnglishSC-Regular";
+  font-family: 'IM_FELL_English_SC', Georgia, 'Times New Roman', Garamond, serif;
   font-size: 20pt;
   font-weight: bold;
   color: #efd5ab;
@@ -251,7 +253,7 @@ font-family: "GothamMedium";
 
 #round_nb {
 
-  font-family: "IMFellEnglishSC-Regular";
+  font-family: 'IM_FELL_English_SC', Georgia, 'Times New Roman', Garamond, serif;
   font-size: 25pt;
   font-weight: bold;
   color: rgb(255, 238, 0);
@@ -268,7 +270,7 @@ font-family: "GothamMedium";
   font-weight: bold;
   padding: 5px 2px 2px;
   font-size: 24px;
-  font-family: "GothamMedium";
+  font-family: 'GothamMedium', Montserrat, Raleway, 'Segoe UI', Arial, sans-serif;
   display: block;
   position: relative; 
   
@@ -282,7 +284,7 @@ font-family: "GothamMedium";
   font-weight: bold;
   padding: 5px 2px 2px;
   font-size: 24px;
-  font-family: "GothamMedium";
+  font-family: 'GothamMedium', Montserrat, Raleway, 'Segoe UI', Arial, sans-serif;
   display: block;
   position: relative; 
   
@@ -496,13 +498,10 @@ font-family: "GothamMedium";
 }
 
 .trick_compteur {
-  /*font-family: "IMFellEnglishSC-Regular";*/
-  font-family: "GothamMedium";
+  font-family: 'GothamMedium', Montserrat, Raleway, 'Segoe UI', Arial, sans-serif;
   font-size: 20pt;
   color: #60371d;
-  cursor: default;
-  
-  
+  cursor: default; 
 }
 
 .bid_icon {
@@ -613,7 +612,7 @@ font-family: "GothamMedium";
 .stockitem .player-title {
 	position: absolute;
 	top: -1.3em;
-  font-family: "IMFellEnglishSC-Regular";
+  font-family: 'IM_FELL_English_SC', Georgia, 'Times New Roman', Garamond, serif;
   font-size: 18pt;
 	font-weight: bold;
 	width: 100%;
