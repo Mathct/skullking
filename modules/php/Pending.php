@@ -194,7 +194,7 @@ class Pending extends APP_GameClass
                             game::$instance->setGameStateValue("requested_color", $index + 1);
                         }
 
-                        if (($type == 'pirate') || ($type == 'mermaid') || ($type == 'skull_king')) {
+                        if (($type == 'pirate') || ($type == 'mermaid') || ($type == 'skull_king') || ($type == 'kraken') || ($type == 'white_whale')) {
                             game::$instance->setGameStateValue("requested_color_cannot_change", 1);
                         }
                     }
@@ -326,7 +326,7 @@ class Pending extends APP_GameClass
                     game::$instance->setGameStateValue("requested_color", $index + 1);
                 }
 
-                if (($type == 'pirate') || ($type == 'mermaid') || ($type == 'skull_king')) {
+                if (($type == 'pirate') || ($type == 'mermaid') || ($type == 'skull_king') || ($type == 'kraken') || ($type == 'white_whale')) {
                     game::$instance->setGameStateValue("requested_color_cannot_change", 1);
                 }
             }

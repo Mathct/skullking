@@ -1097,16 +1097,39 @@ class Game extends \Table
         // SCORING ROUND DIALOG
 
         $scoringdialog_playernames = [''];
-        $scoringdialog_cards = array(clienttranslate("Cards Played"));
-        $scoringdialog_bid = array(clienttranslate("Bid"));
-        $scoringdialog_trick = array(clienttranslate("Tricks Won"));
-        $scoringdialog_trick_vp = array(clienttranslate("Tricks Score"));
-        $scoringdialog_bonus = array(clienttranslate("Bonus Validated"));
-        $scoringdialog_total = array(clienttranslate("Round Total"));
-        $scoringdialog_detail = array(clienttranslate("Bonus Details:"));
-        $scoringdialog_bonustrick = array(clienttranslate("Tricks Bonus:"));
-        $scoringdialog_bonusrascal = array(clienttranslate("Rascal Bonus"));
-        $scoringdialog_bonusloot = array(clienttranslate("Loot Card Bonus"));
+
+        $scoringdialog_cards = [];
+        $scoringdialog_cards[] = ["str" => clienttranslate("Cards Played"), "args" => []];
+
+        $scoringdialog_bid = [];
+        $scoringdialog_bid[] = ["str" => clienttranslate("Bid"), "args" => []];
+
+        $scoringdialog_trick = [];
+        $scoringdialog_trick[] = ["str" => clienttranslate("Tricks Won"), "args" => []];
+
+        $scoringdialog_trick_vp = [];
+        $scoringdialog_trick_vp[] = ["str" => clienttranslate("Tricks Score"), "args" => []];
+
+        $scoringdialog_bonus = [];
+        $scoringdialog_bonus[] = ["str" => clienttranslate("Bonus Validated"), "args" => []];
+
+        $scoringdialog_total = [];
+        $scoringdialog_total[] = ["str" => clienttranslate("Round Total"), "args" => []];
+
+        $scoringdialog_detail = [];
+        $scoringdialog_detail[] = ["str" => clienttranslate("Bonus Details:"), "args" => []];
+
+        $scoringdialog_bonustrick = [];
+        $scoringdialog_bonustrick[] = ["str" => clienttranslate("Tricks Bonus"), "args" => []];
+
+        $scoringdialog_bonusrascal = [];
+        $scoringdialog_bonusrascal[] = ["str" => clienttranslate("Rascal Bonus"), "args" => []];
+
+        $scoringdialog_bonusloot = [];
+        $scoringdialog_bonusloot[] = ["str" => clienttranslate("Loot Card Bonus"), "args" => []];
+                
+               
+        
 
         $player_info = $this->loadPlayersBasicInfos();
         foreach ($player_info as $player) {
@@ -1473,16 +1496,36 @@ class Game extends \Table
 
 
         $scoringdialog_playernames = [''];
-        $scoringdialog_cards = array(clienttranslate("Cards Played"));
-        $scoringdialog_bid = array(clienttranslate("Bid"));
-        $scoringdialog_trick = array(clienttranslate("Tricks Won"));
-        $scoringdialog_trick_vp = array(clienttranslate("Tricks Score"));
-        $scoringdialog_bonus = array(clienttranslate("Bonus Validated"));
-        $scoringdialog_total = array(clienttranslate("Round Total"));
-        $scoringdialog_detail = array(clienttranslate("Bonus Details:"));
-        $scoringdialog_bonustrick = array(clienttranslate("Tricks Bonus:"));
-        $scoringdialog_bonusrascal = array(clienttranslate("Rascal Bonus"));
-        $scoringdialog_bonusloot = array(clienttranslate("Loot Card Bonus"));
+
+        $scoringdialog_cards = [];
+        $scoringdialog_cards[] = ["str" => clienttranslate("Cards Played"), "args" => []];
+
+        $scoringdialog_bid = [];
+        $scoringdialog_bid[] = ["str" => clienttranslate("Bid"), "args" => []];
+
+        $scoringdialog_trick = [];
+        $scoringdialog_trick[] = ["str" => clienttranslate("Tricks Won"), "args" => []];
+
+        $scoringdialog_trick_vp = [];
+        $scoringdialog_trick_vp[] = ["str" => clienttranslate("Tricks Score"), "args" => []];
+
+        $scoringdialog_bonus = [];
+        $scoringdialog_bonus[] = ["str" => clienttranslate("Bonus Validated"), "args" => []];
+
+        $scoringdialog_total = [];
+        $scoringdialog_total[] = ["str" => clienttranslate("Round Total"), "args" => []];
+
+        $scoringdialog_detail = [];
+        $scoringdialog_detail[] = ["str" => clienttranslate("Bonus Details:"), "args" => []];
+
+        $scoringdialog_bonustrick = [];
+        $scoringdialog_bonustrick[] = ["str" => clienttranslate("Tricks Bonus"), "args" => []];
+
+        $scoringdialog_bonusrascal = [];
+        $scoringdialog_bonusrascal[] = ["str" => clienttranslate("Rascal Bonus"), "args" => []];
+
+        $scoringdialog_bonusloot = [];
+        $scoringdialog_bonusloot[] = ["str" => clienttranslate("Loot Card Bonus"), "args" => []];
 
         $player_info = $this->loadPlayersBasicInfos();
 
