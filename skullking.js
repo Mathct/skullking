@@ -702,7 +702,7 @@ setupBoard: function () {
                 <div id="ho_2" class="hidden"></div>
                 </div> 
 
-                <div id="round_nb">${_("Round ")}${this.round_nb} / ${this.total_rounds}</div>
+                <div id="round_nb">${_("Round ")} ${this.round_nb} / ${this.total_rounds}</div>
 
                 <div id="table_cards_container" class="cards-container">
                     <div class="titre">${_("Cards played")}</div>
