@@ -476,6 +476,7 @@ class Game extends \Table
         $kraken = 0;
         $white_whale = 0;
         $player_white_whale = 0;
+        $player_kraken = 0;
         $bests_nb = array();
 
         $loot1_play = game::$instance->getGameStateValue("loot_1_id_play");
@@ -508,6 +509,7 @@ class Game extends \Table
 
             if (($type == 'kraken') && ($white_whale == 0)) {
                 $kraken = 1;
+                $player_kraken = $player;
                 game::$instance->setGameStateValue("kraken", 1);
             }
 
@@ -520,6 +522,7 @@ class Game extends \Table
             if (($type == 'kraken') && ($white_whale == 1)) {
                 $kraken = 1;
                 $white_whale = 0;
+                $player_kraken = $player;
                 game::$instance->setGameStateValue("kraken", 1);
                 game::$instance->setGameStateValue("white_whale", 0);
             }
@@ -623,28 +626,36 @@ class Game extends \Table
 
                 if ($requested_color_nb == 0) // si y a que des escapes ou des loots
                 {
+                    $winner = $player_kraken;
+                    
+                    if($winner == 0)
+                    {
                     $winner = $first_escape;
+                 
 
                     $type_escape = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_location_arg = '{$winner}'");
 
-                    if ($type_escape == 'loot') {
-                        if ($loot_nb_in_turn == 1) {
-                            $loot_nb_in_turn = 0; // si y a qu'1 seul loot en premiere position... il n'est pas pris en compte
+                        if ($type_escape == 'loot') {
+                            if ($loot_nb_in_turn == 1) {
+                                $loot_nb_in_turn = 0; // si y a qu'1 seul loot en premiere position... il n'est pas pris en compte
 
-                        }
+                            }
 
-                        if ($loot_nb_in_turn == 2) {
-                            $loot_nb_in_turn = 1; // si y a 2 loot et 1 en premiere position... le premier ne sera pas pris en compte... le second prendra la place du premier 
-                            $loot1_play = $loot2_play;
-                            $loot2_play = 0;
-                            game::$instance->setGameStateValue("loot_1_id_play", $loot1_play);
-                            game::$instance->setGameStateValue("loot_2_id_play", 0);
+                            if ($loot_nb_in_turn == 2) {
+                                $loot_nb_in_turn = 1; // si y a 2 loot et 1 en premiere position... le premier ne sera pas pris en compte... le second prendra la place du premier 
+                                $loot1_play = $loot2_play;
+                                $loot2_play = 0;
+                                game::$instance->setGameStateValue("loot_1_id_play", $loot1_play);
+                                game::$instance->setGameStateValue("loot_2_id_play", 0);
+                            }
                         }
                     }
                 }
             }
 
+        
             if ($kraken == 0) {
+                 
                 game::$instance->DbQuery("UPDATE player set player_tricks = player_tricks +1 WHERE player_id = '{$winner}' ");
 
                 //LOOT
