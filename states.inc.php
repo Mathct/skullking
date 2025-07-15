@@ -68,7 +68,7 @@ $machinestates = [
         "type" => "private",
         "args" => "argBid",
         "possibleactions" => ["actSelect", "actShowLastScore"],
-        "transitions" => ['confirmbid' => 51]
+        "transitions" => ['confirmbid' => 51, "same" => 50]
     ],
 
     51 => [

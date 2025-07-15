@@ -1436,7 +1436,17 @@ class Game extends \Table
 
             game::$instance->DbQuery("UPDATE player set player_bid = $bet WHERE player_id = '{$player_id}'");
 
-            $this->gamestate->nextPrivateState($player_id, "confirmbid");
+            $bet = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id={$player_id}");
+            if($bet == -1)
+            {
+                $this->gamestate->nextPrivateState($player_id, "same");
+            }
+            else
+            {
+                $this->gamestate->nextPrivateState($player_id, "confirmbid");
+            }
+
+            
         } else {
             self::checkArgs($arg1);
 
