@@ -58,7 +58,7 @@ class Pending extends APP_GameClass
             $special_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}' AND card_type != 'green' AND card_type != 'purple'AND card_type != 'yellow' AND card_type != 'black'", true);
 
 
-            if ($color_request == 0)    // si la couleur demandée n'a pas été encore définie dans le tour le joueur peut jouer ce qu'il veut
+            if (($color_request == 0)||(game::$instance->getGameStateValue("kraken_first_card") == 1))    // si la couleur demandée n'a pas été encore définie dans le tour le joueur peut jouer ce qu'il veut
             {
                 foreach ($all_cards as $card) {
                     $ret["selectable"][] = 'my_cards_item_' . $card;
@@ -194,9 +194,19 @@ class Pending extends APP_GameClass
                             game::$instance->setGameStateValue("requested_color", $index + 1);
                         }
 
-                        if (($type == 'pirate') || ($type == 'mermaid') || ($type == 'skull_king') || ($type == 'kraken') || ($type == 'white_whale')) {
+                        if (($type == 'pirate') || ($type == 'mermaid') || ($type == 'skull_king') || ($type == 'white_whale')) {
                             game::$instance->setGameStateValue("requested_color_cannot_change", 1);
                         }
+
+                        if(game::$instance->getGameStateValue("requested_color_cannot_change") == 0)
+                        {
+                            if($type == 'kraken')
+                            {
+                                game::$instance->setGameStateValue("kraken_first_card", 1);
+                            }
+                        }
+
+                        
                     }
 
 

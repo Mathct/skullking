@@ -84,6 +84,7 @@ class Game extends \Table
             "juanita_container" => 27,
             "harry_container" => 28,
             "end_of_game" => 29,
+            "kraken_first_card" => 30,
 
 
         ]);
@@ -168,6 +169,9 @@ class Game extends \Table
         $this->setGameStateInitialValue("juanita_container", 0);
         $this->setGameStateInitialValue("harry_container", 0);
         $this->setGameStateInitialValue("end_of_game", 0);
+        $this->setGameStateInitialValue("kraken_first_card", 0);
+
+        
 
         // STATS
 
