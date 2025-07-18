@@ -50,6 +50,7 @@ class Pending extends APP_GameClass
                 $color_request = $this->color[game::$instance->getGameStateValue("requested_color") - 1];
             }
 
+            
 
             $green_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}' AND card_type = 'green'", true);
             $purple_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}' AND card_type = 'purple'", true);
@@ -60,6 +61,7 @@ class Pending extends APP_GameClass
 
             if (($color_request == 0)||(game::$instance->getGameStateValue("kraken_first_card") == 1))    // si la couleur demandée n'a pas été encore définie dans le tour le joueur peut jouer ce qu'il veut
             {
+                
                 foreach ($all_cards as $card) {
                     $ret["selectable"][] = 'my_cards_item_' . $card;
                 }
@@ -336,8 +338,16 @@ class Pending extends APP_GameClass
                     game::$instance->setGameStateValue("requested_color", $index + 1);
                 }
 
-                if (($type == 'pirate') || ($type == 'mermaid') || ($type == 'skull_king') || ($type == 'kraken') || ($type == 'white_whale')) {
+                if (($type == 'pirate') || ($type == 'mermaid') || ($type == 'skull_king') || ($type == 'white_whale')) {
                     game::$instance->setGameStateValue("requested_color_cannot_change", 1);
+                }
+
+                if(game::$instance->getGameStateValue("requested_color_cannot_change") == 0)
+                {
+                    if($type == 'kraken')
+                    {
+                        game::$instance->setGameStateValue("kraken_first_card", 1);
+                    }
                 }
             }
 
@@ -725,6 +735,7 @@ class Pending extends APP_GameClass
         game::$instance->setGameStateValue("kraken", 0);
         game::$instance->setGameStateValue("white_whale", 0);
         game::$instance->setGameStateValue("loot_nb_in_turn", 0);
+        game::$instance->setGameStateValue("kraken_first_card", 0);
 
         // CHANGE FIRST PLAYER TRICK
         game::$instance->setGameStateValue("first_player_trick", $winner);
@@ -969,6 +980,7 @@ class Pending extends APP_GameClass
         game::$instance->setGameStateValue("kraken", 0);
         game::$instance->setGameStateValue("white_whale", 0);
         game::$instance->setGameStateValue("loot_nb_in_turn", 0);
+        game::$instance->setGameStateValue("kraken_first_card", 0);
 
         if ($pirate_power == 0) {
 
