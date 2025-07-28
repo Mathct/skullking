@@ -621,7 +621,7 @@ class Pending extends APP_GameClass
         if ((game::$instance->getGameStateValue("kraken") == 0) && (game::$instance->getGameStateValue("white_whale") == 0)) {
             game::$instance->notifyAllPlayers(
                 'endTrick',
-                clienttranslate('${player_name} wins the trick and begins the next turn'),
+                clienttranslate('${player_name} wins the trick and begins the next trick'),
                 array(
                     'winner_id' => $winner,
                     'winner_infos' => $winner_infos,
