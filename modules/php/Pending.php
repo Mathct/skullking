@@ -648,7 +648,7 @@ class Pending extends APP_GameClass
 
             game::$instance->notifyAllPlayers(
                 'krakenEffect',
-                clienttranslate('${log} destroys the trick and ${player_name} begins the next turn'),
+                clienttranslate('${log} destroys the trick and ${player_name} begins the next trick'),
                 array(
                     'player_name' => $winner_name,
                     'cards' => $cards,
@@ -671,7 +671,7 @@ class Pending extends APP_GameClass
 
                 game::$instance->notifyAllPlayers(
                     'krakenEffect',
-                    clienttranslate('${log} destroys the trick because ${player_name} won the trick. ${player_name} begins the next turn'),
+                    clienttranslate('${log} destroys the trick because ${player_name} won the trick. ${player_name} begins the next trick'),
                     array(
                         'player_name' => $winner_name,
                         'cards' => $cards,
@@ -712,7 +712,7 @@ class Pending extends APP_GameClass
 
                 game::$instance->notifyAllPlayers(
                     'endTrick',
-                    clienttranslate('${player_name} wins the trick thanks to ${log}. ${player_name} begins the next turn'),
+                    clienttranslate('${player_name} wins the trick thanks to ${log}. ${player_name} begins the next trick'),
                     array(
                         'winner_id' => $winner,
                         'winner_infos' => $winner_infos,

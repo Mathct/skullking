@@ -630,12 +630,11 @@ class Game extends \Table
 
                 if ($requested_color_nb == 0) // si y a que des escapes ou des loots
                 {
-                    $winner = $player_kraken;
-                    
-                    if($winner == 0)
-                    {
                     $winner = $first_escape;
-                 
+                    
+                    if($kraken == 0)
+                    {
+                                    
 
                     $type_escape = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_location_arg = '{$winner}'");
 
