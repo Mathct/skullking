@@ -87,7 +87,7 @@ body {
 }
 
 .tooltip_bigtitle {
-  font-family: 'GothamMedium', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
   font-size: 24pt;
   /*font-variant: small-caps;*/
   color: #1f3a21;
@@ -95,14 +95,14 @@ body {
     
     
 .tooltip_title {
-  font-family: 'GothamMedium', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
   font-size: 20pt;
   /*font-variant: small-caps;*/
   color: #1f3a21;
 }
 
 .tooltip_subtitle {
-  font-family: 'GothamMedium', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
   font-size: 16pt;
   font-variant: small-caps;
   color: #1f3a21;
@@ -225,7 +225,7 @@ body {
 
 /* Compteur */
 .icon-text {
-  font-family: 'GothamMedium', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
   font-size: 16pt;
   line-height: 50px;
 }
@@ -270,7 +270,7 @@ body {
   font-weight: bold;
   padding: 5px 2px 2px;
   font-size: 24px;
-  font-family: 'GothamMedium', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
   display: block;
   position: relative; 
   
@@ -284,7 +284,7 @@ body {
   font-weight: bold;
   padding: 5px 2px 2px;
   font-size: 24px;
-  font-family: 'GothamMedium', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
   display: block;
   position: relative; 
   
@@ -498,7 +498,7 @@ body {
 }
 
 .trick_compteur {
-  font-family: 'GothamMedium', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
   font-size: 20pt;
   color: #60371d;
   cursor: default; 
