@@ -481,6 +481,7 @@ class Game extends \Table
         $white_whale = 0;
         $player_white_whale = 0;
         $player_kraken = 0;
+        $color_kraken = null;
         $bests_nb = array();
 
         $loot1_play = game::$instance->getGameStateValue("loot_1_id_play");
@@ -559,7 +560,7 @@ class Game extends \Table
         }
 
 
-        
+                
         $index = array_search('pirate', $ordre_card_type);
         if ($index !== false) {
             $first_pirate = $ordre_players[$index];
@@ -601,6 +602,20 @@ class Game extends \Table
             $bests_nb = self::getObjectListFromDB("SELECT card_location_arg FROM card WHERE card_type IN ('green', 'purple', 'yellow', 'black') AND card_location = 'table' AND card_type_arg = (SELECT MAX(card_type_arg) FROM card WHERE card_type IN ('green', 'purple', 'yellow', 'black') AND card_location = 'table')", true);
         }
 
+        if($kraken == 1) {
+            $allowed = ["green", "purple", "yellow"];
+
+            foreach ($ordre_card_type as $color) {
+                if (in_array($color, $allowed)) {
+                    $color_kraken = $color;
+                    break;
+                }
+            }
+
+        }
+
+        
+
 
         if ($white_whale == 0) {
             // WINNER
@@ -616,19 +631,19 @@ class Game extends \Table
             } elseif ($best_black != 0) {
                 $winner = $best_black;
             } else {
-                if ($requested_color_name == 'green') {
+                if (($requested_color_name == 'green')||(($kraken == 1)&&($color_kraken == 'green')) ){
                     $winner = $best_green;
                 }
 
-                if ($requested_color_name == 'purple') {
+                if (($requested_color_name == 'purple')||(($kraken == 1)&&($color_kraken == 'purple')) ){
                     $winner = $best_purple;
                 }
 
-                if ($requested_color_name == 'yellow') {
+                if (($requested_color_name == 'yellow')||(($kraken == 1)&&($color_kraken == 'yellow')) ){
                     $winner = $best_yellow;
                 }
 
-                if ($requested_color_nb == 0) // si y a que des escapes ou des loots
+                if (($requested_color_nb == 0)&&($color_kraken == null)) // si y a que des escapes ou des loots
                 {
                     $winner = $first_escape;
                     
@@ -980,6 +995,8 @@ class Game extends \Table
             }
         }
 
+        
+
         return $winner;
     }
 
@@ -1000,6 +1017,7 @@ class Game extends \Table
             $bonus_vp = 0;
             $bonus_trick = 0;
             $bonus_rascal = 0;
+            $tricks_vp = 0;
 
             if ($tricks == $bid) {
                 $bonus_trick = self::getUniqueValueFromDB("SELECT player_bonus_trick FROM player WHERE player_id = '{$player}'");
