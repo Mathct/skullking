@@ -86,10 +86,13 @@ setup: function( gamedatas )
     this.first_player_trick = gamedatas.first_player_trick;
     this.first_player_round = gamedatas.first_player_round;
 
-    this.timer = 5;
-    if (this.getGameUserPreference(101) !== null && this.getGameUserPreference(101) !== undefined) {
-        this.timer = this.getGameUserPreference(101);
-    }
+    if(this.getGameUserPreference(101) != 0)
+    {
+        this.timer = 5;
+        if (this.getGameUserPreference(101) !== null && this.getGameUserPreference(101) !== undefined) {
+            this.timer = this.getGameUserPreference(101);
+        }
+    }   
 
 
 
@@ -315,7 +318,10 @@ onUpdateActionButtons: function( stateName, args )
                     if(args.buttons[nb] == "yes")
                     {
                         this.addActionButton( 'yes', _("Yes") ,'onOpButton', null, null, 'blue' );
-                        this.startActionTimer('yes', this.timer, 1);
+                        if(this.getGameUserPreference(101) != 0)
+                        {
+                            this.startActionTimer('yes', this.timer, 1);
+                        }
                     }
                     if(args.buttons[nb] == "no")
                     {
