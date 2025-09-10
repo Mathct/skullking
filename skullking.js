@@ -358,7 +358,10 @@ onUpdateActionButtons: function( stateName, args )
                         if(args.buttons[player_id2][nb] == "yes")
                             {
                                 this.addActionButton( 'yes', _("Yes") ,'onOpButtonConfirmBid', null, null, 'blue' );
-                                // this.startActionTimer('yes', this.timer, 1);
+                                if(this.getGameUserPreference(101) != 0)
+                                {
+                                    this.startActionTimer('yes', this.timer, 1);
+                                }
                             }
                             if(args.buttons[player_id2][nb] == "no")
                             {
