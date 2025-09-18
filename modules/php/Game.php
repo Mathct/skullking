@@ -1960,7 +1960,7 @@ class Game extends \Table
                 default: {
                         $player_id = $this->getActivePlayerId();
                         self::DbQuery("DELETE FROM pending WHERE player_id = {$player_id}");
-                        $this->gamestate->nextState("zombiePass");
+                        $this->gamestate->nextState("end");
                         break;
                     }
             }
@@ -1971,6 +1971,7 @@ class Game extends \Table
         // Make sure player is in a non-blocking status for role turn.
         if ($state["type"] === "multipleactiveplayer") {
             $this->gamestate->setPlayerNonMultiactive($active_player, '');
+            $this->gamestate->nextState("end");
             return;
         }
 
