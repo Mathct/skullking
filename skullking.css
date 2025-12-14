@@ -36,6 +36,11 @@ body {
 
 }
 
+#page-title {
+  min-height: 52px !important;
+}
+
+
 
 /* Fonts and Tooltips */
 
