@@ -1,18 +1,28 @@
 <?php
 
 namespace Bga\Games\skullking;   // ATTENTION NOM DU JEU
-use APP_GameClass;
+
+use Bga\GameFramework\Table;
 
 require_once 'Pirates.php'; // Inclure le fichier contenant les fonctions
 
-class Pending extends APP_GameClass
+class Pending
 {
     use PiratesTrait; // ATTENTION
+
+    public mixed $player_no;
+    public mixed $player_id;
+    public mixed $player_name;
+    public mixed $player_score;
+    public mixed $player_color;
+    public mixed $color;
+    public mixed $special;
+    public mixed $player_pref_confirm;
 
     public function __construct($player_id)
     {
         $this->player_id = $player_id;
-        $p = self::getObjectFromDB("SELECT * FROM player WHERE player_id = {$player_id}");
+        $p = Table::getObjectFromDB("SELECT * FROM `player` WHERE `player_id` = {$player_id}");
         $this->player_no = $p['player_no'];
         $this->player_id = $p['player_id'];
         $this->player_name = $p['player_name'];
@@ -25,7 +35,7 @@ class Pending extends APP_GameClass
 
         /// PREFERENCE DE CONFIRMATION
 
-        $this->player_pref_confirm = game::$instance->getUniqueValueFromDB("SELECT pgp_value FROM bga_user_preferences WHERE pgp_player='{$this->player_id}' AND pgp_preference_id = 100");
+        $this->player_pref_confirm = game::$instance->getUniqueValueFromDB("SELECT `pgp_value` FROM `bga_user_preferences` WHERE `pgp_player`='{$this->player_id}' AND pgp_preference_id = 100");
     }
 
     function argPlayCard($parg1, $parg2)
@@ -39,8 +49,8 @@ class Pending extends APP_GameClass
 
         $color_request = 0;
 
-        $player_turn = self::getUniqueValueFromDB("SELECT player_turn FROM player WHERE player_id={$this->player_id}");
-        $all_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}'", true);
+        $player_turn = Table::getUniqueValueFromDB("SELECT `player_turn` FROM `player` WHERE `player_id`={$this->player_id}");
+        $all_cards = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'hand' AND `card_location_arg` = '{$this->player_id}'", true);
 
         if (($player_turn != 1) && ($all_cards != null)) // si le joueur n'a pas joué son tour ET qu'il a encore des cartes en main
         {
@@ -52,11 +62,11 @@ class Pending extends APP_GameClass
 
             
 
-            $green_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}' AND card_type = 'green'", true);
-            $purple_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}' AND card_type = 'purple'", true);
-            $yellow_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}' AND card_type = 'yellow'", true);
-            $black_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}' AND card_type = 'black'", true);
-            $special_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}' AND card_type != 'green' AND card_type != 'purple'AND card_type != 'yellow' AND card_type != 'black'", true);
+            $green_cards = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'hand' AND `card_location_arg` = '{$this->player_id}' AND card_type = 'green'", true);
+            $purple_cards = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'hand' AND `card_location_arg` = '{$this->player_id}' AND card_type = 'purple'", true);
+            $yellow_cards = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'hand' AND `card_location_arg` = '{$this->player_id}' AND card_type = 'yellow'", true);
+            $black_cards = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'hand' AND `card_location_arg` = '{$this->player_id}' AND card_type = 'black'", true);
+            $special_cards = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'hand' AND `card_location_arg` = '{$this->player_id}' AND card_type != 'green' AND card_type != 'purple'AND card_type != 'yellow' AND card_type != 'black'", true);
 
 
             if (($color_request == 0)||(game::$instance->getGameStateValue("kraken_first_card") == 1))    // si la couleur demandée n'a pas été encore définie dans le tour le joueur peut jouer ce qu'il veut
@@ -96,8 +106,8 @@ class Pending extends APP_GameClass
     function PlayCard($parg1, $parg2, $varg1, $varg2)
     {
         if ($varg1 == null) {
-            $player_turn = self::getUniqueValueFromDB("SELECT player_turn FROM player WHERE player_id='{$this->player_id}'");
-            $all_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}'", true);
+            $player_turn = Table::getUniqueValueFromDB("SELECT `player_turn` FROM `player` WHERE `player_id`='{$this->player_id}'");
+            $all_cards = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'hand' AND `card_location_arg` = '{$this->player_id}'", true);
 
             if (($player_turn == 1) && ($all_cards != null))  // fin de tour 
             {
@@ -112,7 +122,7 @@ class Pending extends APP_GameClass
             // placement de card sur la table
             $explode = explode('_', $varg1);
             $card_id = end($explode);
-            $type = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_id='{$card_id}'");
+            $type = Table::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_id`='{$card_id}'");
 
             if ($this->player_pref_confirm == 1) {
 
@@ -131,15 +141,15 @@ class Pending extends APP_GameClass
                         
                     }
 
-                    $card_before = self::getObjectFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_id = {$card_id}");
+                    $card_before = Table::getObjectFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_id` = {$card_id}");
                     game::$instance->db_card->moveCard($card_id, 'table', $this->player_id);
-                    $card_after = self::getObjectFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_id = {$card_id}");
+                    $card_after = Table::getObjectFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_id` = {$card_id}");
 
 
 
                     ///////////PLAY + LOG ////////////
-                    $card_type = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_id='{$card_id}'");
-                    $card_type_arg = intval(self::getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_id='{$card_id}'"));
+                    $card_type = Table::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_id`='{$card_id}'");
+                    $card_type_arg = intval(Table::getUniqueValueFromDB("SELECT `card_type_arg` FROM `card` WHERE `card_id`='{$card_id}'"));
                     $log = game::$instance->getLogsType($card_id);
                     
                     if($card_type != 'pirate')
@@ -215,7 +225,7 @@ class Pending extends APP_GameClass
 
 
                     // end function
-                    game::$instance->DbQuery("UPDATE player set player_turn = player_turn + 1 WHERE player_id = '{$this->player_id}'");
+                    game::$instance->DbQuery("UPDATE `player` set `player_turn` = `player_turn` + 1 WHERE `player_id` = '{$this->player_id}'");
                     game::$instance->giveExtraTime($this->player_id);
                     game::$instance->addPendingFirst($this->player_id, "PlayCard");
                 } else {
@@ -262,7 +272,7 @@ class Pending extends APP_GameClass
         if ($varg1 == 'yes') {
             $explode = explode('_', $parg1);
             $card_id = end($explode);
-            $type = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_id='{$card_id}'");
+            $type = Table::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_id`='{$card_id}'");
 
             if ($type == 'loot') {
                 if (game::$instance->getGameStateValue("loot_1_id_play") == 0) {
@@ -277,14 +287,14 @@ class Pending extends APP_GameClass
                 
             }
 
-            $card_before = self::getObjectFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_id = {$card_id}");
+            $card_before = Table::getObjectFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_id` = {$card_id}");
             game::$instance->db_card->moveCard($card_id, 'table', $this->player_id);
-            $card_after = self::getObjectFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_id = {$card_id}");
+            $card_after = Table::getObjectFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_id` = {$card_id}");
 
 
             ///////////PLAY + LOG ////////////
-            $card_type = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_id='{$card_id}'");
-            $card_type_arg = intval(self::getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_id='{$card_id}'"));
+            $card_type = Table::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_id`='{$card_id}'");
+            $card_type_arg = intval(Table::getUniqueValueFromDB("SELECT `card_type_arg` FROM `card` WHERE `card_id`='{$card_id}'"));
             $log = game::$instance->getLogsType($card_id);
             
             if($card_type != 'pirate')
@@ -352,7 +362,7 @@ class Pending extends APP_GameClass
             }
 
             // end function
-            game::$instance->DbQuery("UPDATE player set player_turn = player_turn + 1 WHERE player_id = '{$this->player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_turn` = `player_turn` + 1 WHERE `player_id` = '{$this->player_id}'");
             game::$instance->giveExtraTime($this->player_id);
             game::$instance->addPendingFirst($this->player_id, "PlayCard");
         }
@@ -400,9 +410,9 @@ class Pending extends APP_GameClass
 
                 $explode = explode('_', $parg1);
                 $card_id = end($explode);
-                $card_before = self::getObjectFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_id = {$card_id}");
+                $card_before = Table::getObjectFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_id` = {$card_id}");
                 game::$instance->db_card->moveCard($card_id, 'table', $this->player_id);
-                $card_after = self::getObjectFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_id = {$card_id}");
+                $card_after = Table::getObjectFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_id` = {$card_id}");
 
                 $log = game::$instance->getLogsType($card_id);
                 
@@ -436,7 +446,7 @@ class Pending extends APP_GameClass
                     )
                 );
 
-                game::$instance->DbQuery("UPDATE player set player_turn = player_turn + 1 WHERE player_id = '{$this->player_id}'");
+                game::$instance->DbQuery("UPDATE `player` set `player_turn` = `player_turn` + 1 WHERE `player_id` = '{$this->player_id}'");
                 game::$instance->giveExtraTime($this->player_id);
                 game::$instance->addPendingFirst($this->player_id, "PlayCard");
             }
@@ -489,9 +499,9 @@ class Pending extends APP_GameClass
 
             $explode = explode('_', $parg1);
             $card_id = end($explode);
-            $card_before = self::getObjectFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_id = {$card_id}");
+            $card_before = Table::getObjectFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_id` = {$card_id}");
             game::$instance->db_card->moveCard($card_id, 'table', $this->player_id);
-            $card_after = self::getObjectFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_id = {$card_id}");
+            $card_after = Table::getObjectFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_id` = {$card_id}");
 
 
             $log = game::$instance->getLogsType($card_id);
@@ -523,7 +533,7 @@ class Pending extends APP_GameClass
                     )
                 );
 
-            game::$instance->DbQuery("UPDATE player set player_turn = player_turn + 1 WHERE player_id = '{$this->player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_turn` = `player_turn` + 1 WHERE `player_id` = '{$this->player_id}'");
             game::$instance->giveExtraTime($this->player_id);
             game::$instance->addPendingFirst($this->player_id, "PlayCard");
         }
@@ -548,10 +558,10 @@ class Pending extends APP_GameClass
 
         $pirate_power = 0;
 
-        $cards_played = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'table'", true);
-        $id_card_winner = self::getUniqueValueFromDB("SELECT card_id FROM card WHERE card_location = 'table' AND card_location_arg = '{$winner}'");
-        $type_card_winner = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_location_arg = '{$winner}'");
-        $type_arg_card_winner = self::getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_location = 'table' AND card_location_arg = '{$winner}'");
+        $cards_played = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'table'", true);
+        $id_card_winner = Table::getUniqueValueFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'table' AND `card_location_arg` = '{$winner}'");
+        $type_card_winner = Table::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_location` = 'table' AND `card_location_arg` = '{$winner}'");
+        $type_arg_card_winner = Table::getUniqueValueFromDB("SELECT `card_type_arg` FROM `card` WHERE `card_location` = 'table' AND `card_location_arg` = '{$winner}'");
 
         $bonus = array();
         $bonus[] = $winner;
@@ -559,10 +569,10 @@ class Pending extends APP_GameClass
         foreach ($cards_played as $card_played) {
             if ((game::$instance->getGameStateValue("kraken") == 0) && (game::$instance->getGameStateValue("white_whale") == 0)) {
                 // BONUS
-                $type_card = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_id = '{$card_played}'");
-                $type_arg_card = self::getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_location = 'table' AND card_id = '{$card_played}'");
+                $type_card = Table::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_location` = 'table' AND `card_id` = '{$card_played}'");
+                $type_arg_card = Table::getUniqueValueFromDB("SELECT `card_type_arg` FROM `card` WHERE `card_location` = 'table' AND `card_id` = '{$card_played}'");
                 if ((($type_card == 'green') || ($type_card == 'purple') || ($type_card == 'yellow')) && ($type_arg_card == 14)) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 10 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 10 WHERE `player_id` = '{$winner}' ");
                     if($type_card == 'green')
                     {
                         $bonus[] = 1;
@@ -579,29 +589,29 @@ class Pending extends APP_GameClass
                     }
                 }
                 if (($type_card == 'black') && ($type_arg_card == 14)) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 20 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 20 WHERE `player_id` = '{$winner}' ");
                     $bonus[] = 4;
                 }
                 if (($type_card_winner == 'pirate') && ($type_card == 'mermaid')) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 20 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 20 WHERE `player_id` = '{$winner}' ");
                     $bonus[] = 5;
                     //stat
                     game::$instance->incStat(1, 'mermaid_captured');
                 }
                 if (($type_card_winner == 'tigress') && (game::$instance->getGameStateValue("tigress_role") == 1) && ($type_card == 'mermaid')) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 20 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 20 WHERE `player_id` = '{$winner}' ");
                     $bonus[] = 5;
                     //stat
                     game::$instance->incStat(1, 'mermaid_captured');
                 }
                 if ((($type_card_winner == 'skull_king') && ($type_card == 'pirate')) || (($type_card_winner == 'skull_king') && ($type_card == 'tigress') && (game::$instance->getGameStateValue("tigress_role") == 1))) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 30 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 30 WHERE `player_id` = '{$winner}' ");
                     $bonus[] = 6;
                     //stat
                     game::$instance->incStat(1, 'pirate_captured');
                 }
                 if (($type_card_winner == 'mermaid') && ($type_card == 'skull_king')) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 40 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 40 WHERE `player_id` = '{$winner}' ");
                     $bonus[] = 7;
                     //stat
                     game::$instance->incStat(1, 'sk_captured');
@@ -611,12 +621,12 @@ class Pending extends APP_GameClass
             }
         }
 
-        $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
+        $winner_name = Table::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
 
-        $sql = "SELECT player_no no, player_id id, player_score score, player_name name, player_color color, player_bid bid, player_bid_validated bid_validated, player_tricks tricks, player_turn turn, player_bonus_trick bonus_trick, player_bonus_rascal bonus_rascal 
-            FROM player ";
-        $sql .= "WHERE player_id = '{$winner}'";
-        $winner_infos = $this->getObjectFromDB($sql);
+        $sql = "SELECT `player_no` no, `player_id` `id`, `player_score` score, `player_name` name, `player_color` color, `player_bid` `bid`, `player_bid_validated` bid_validated, `player_tricks` `tricks`, `player_turn` turn, `player_bonus_trick` `bonus_trick`, `player_bonus_rascal` `bonus_rascal` 
+            FROM `player` ";
+        $sql .= "WHERE `player_id` = '{$winner}'";
+        $winner_infos = Table::getObjectFromDB($sql);
 
         if ((game::$instance->getGameStateValue("kraken") == 0) && (game::$instance->getGameStateValue("white_whale") == 0)) {
             game::$instance->notifyAllPlayers(
@@ -640,7 +650,7 @@ class Pending extends APP_GameClass
 
         if (game::$instance->getGameStateValue("kraken") == 1) {
 
-            $cards = self::getObjectListFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_location = 'table'");
+            $cards = Table::getObjectListFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_location` = 'table'");
 
             foreach ($cards_played as $card_played) {
                 game::$instance->db_card->moveCard($card_played, 'discard', 0);
@@ -662,7 +672,7 @@ class Pending extends APP_GameClass
         if (game::$instance->getGameStateValue("white_whale") == 1) {
             if ($type_card_winner == 'white_whale') {
 
-                $cards = self::getObjectListFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_location = 'table'");
+                $cards = Table::getObjectListFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_location` = 'table'");
 
                 foreach ($cards_played as $card_played) {
                     game::$instance->db_card->moveCard($card_played, 'discard', 0);
@@ -683,10 +693,10 @@ class Pending extends APP_GameClass
             } else {
                 foreach ($cards_played as $card_played) {
                     // BONUS
-                    $type_card = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_id = '{$card_played}'");
-                    $type_arg_card = self::getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_location = 'table' AND card_id = '{$card_played}'");
+                    $type_card = Table::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_location` = 'table' AND `card_id` = '{$card_played}'");
+                    $type_arg_card = Table::getUniqueValueFromDB("SELECT `card_type_arg` FROM `card` WHERE `card_location` = 'table' AND `card_id` = '{$card_played}'");
                     if ((($type_card == 'green') || ($type_card == 'purple') || ($type_card == 'yellow')) && ($type_arg_card == 14)) {
-                        game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 10 WHERE player_id = '{$winner}' ");
+                        game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 10 WHERE `player_id` = '{$winner}' ");
                         if($type_card == 'green')
                         {
                             $bonus[] = 1;
@@ -703,7 +713,7 @@ class Pending extends APP_GameClass
                         }
                     }
                     if (($type_card == 'black') && ($type_arg_card == 14)) {
-                        game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 20 WHERE player_id = '{$winner}' ");
+                        game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 20 WHERE `player_id` = '{$winner}' ");
                         $bonus[] = 4;
                     }
 
@@ -731,7 +741,7 @@ class Pending extends APP_GameClass
         game::$instance->setGameStateValue("requested_color", 0);
         game::$instance->setGameStateValue("requested_color_cannot_change", 0);
         game::$instance->setGameStateValue("tigress_role", 0);
-        game::$instance->DbQuery("UPDATE player set player_turn = 0 ");
+        game::$instance->DbQuery("UPDATE `player` set `player_turn` = 0 ");
         game::$instance->setGameStateValue("kraken", 0);
         game::$instance->setGameStateValue("white_whale", 0);
         game::$instance->setGameStateValue("loot_nb_in_turn", 0);
@@ -743,10 +753,10 @@ class Pending extends APP_GameClass
         if ($pirate_power == 0) {
             $nextplayer = $winner;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -790,10 +800,10 @@ class Pending extends APP_GameClass
 
         $pirate_power = 0;
 
-        $cards_played = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'table'", true);
-        $id_card_winner = self::getUniqueValueFromDB("SELECT card_id FROM card WHERE card_location = 'table' AND card_location_arg = '{$winner}'");
-        $type_card_winner = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_location_arg = '{$winner}'");
-        $type_arg_card_winner = self::getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_location = 'table' AND card_location_arg = '{$winner}'");
+        $cards_played = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'table'", true);
+        $id_card_winner = Table::getUniqueValueFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'table' AND `card_location_arg` = '{$winner}'");
+        $type_card_winner = Table::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_location` = 'table' AND `card_location_arg` = '{$winner}'");
+        $type_arg_card_winner = Table::getUniqueValueFromDB("SELECT `card_type_arg` FROM `card` WHERE `card_location` = 'table' AND `card_location_arg` = '{$winner}'");
 
         $bonus = array();
         $bonus[] = $winner;
@@ -801,10 +811,10 @@ class Pending extends APP_GameClass
         foreach ($cards_played as $card_played) {
             if ((game::$instance->getGameStateValue("kraken") == 0) && (game::$instance->getGameStateValue("white_whale") == 0)) {
                 // BONUS
-                $type_card = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_id = '{$card_played}'");
-                $type_arg_card = self::getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_location = 'table' AND card_id = '{$card_played}'");
+                $type_card = Table::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_location` = 'table' AND `card_id` = '{$card_played}'");
+                $type_arg_card = Table::getUniqueValueFromDB("SELECT `card_type_arg` FROM `card` WHERE `card_location` = 'table' AND `card_id` = '{$card_played}'");
                 if ((($type_card == 'green') || ($type_card == 'purple') || ($type_card == 'yellow')) && ($type_arg_card == 14)) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 10 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 10 WHERE `player_id` = '{$winner}' ");
                     if($type_card == 'green')
                     {
                         $bonus[] = 1;
@@ -821,29 +831,29 @@ class Pending extends APP_GameClass
                     }
                 }
                 if (($type_card == 'black') && ($type_arg_card == 14)) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 20 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 20 WHERE `player_id` = '{$winner}' ");
                     $bonus[] = 4;
                 }
                 if (($type_card_winner == 'pirate') && ($type_card == 'mermaid')) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 20 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 20 WHERE `player_id` = '{$winner}' ");
                     $bonus[] = 5;
                     //stat
                     game::$instance->incStat(1, 'mermaid_captured');
                 }
                 if (($type_card_winner == 'tigress') && (game::$instance->getGameStateValue("tigress_role") == 1) && ($type_card == 'mermaid')) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 20 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 20 WHERE `player_id` = '{$winner}' ");
                     $bonus[] = 5;
                     //stat
                     game::$instance->incStat(1, 'mermaid_captured');
                 }
                 if ((($type_card_winner == 'skull_king') && ($type_card == 'pirate')) || (($type_card_winner == 'skull_king') && ($type_card == 'tigress') && (game::$instance->getGameStateValue("tigress_role") == 1))) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 30 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 30 WHERE `player_id` = '{$winner}' ");
                     $bonus[] = 6;
                      //stat
                     game::$instance->incStat(1, 'pirate_captured');
                 }
                 if (($type_card_winner == 'mermaid') && ($type_card == 'skull_king')) {
-                    game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 40 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 40 WHERE `player_id` = '{$winner}' ");
                     $bonus[] = 7;
                     //stat
                     game::$instance->incStat(1, 'sk_captured');
@@ -853,12 +863,12 @@ class Pending extends APP_GameClass
             }
         }
 
-        $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
+        $winner_name = Table::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
 
-        $sql = "SELECT player_no no, player_id id, player_score score, player_name name, player_color color, player_bid bid, player_bid_validated bid_validated, player_tricks tricks, player_turn turn, player_bonus_trick bonus_trick, player_bonus_rascal bonus_rascal 
-            FROM player ";
-        $sql .= "WHERE player_id = '{$winner}'";
-        $winner_infos = $this->getObjectFromDB($sql);
+        $sql = "SELECT `player_no` no, `player_id` `id`, `player_score` score, `player_name` name, `player_color` color, `player_bid` `bid`, `player_bid_validated` bid_validated, `player_tricks` `tricks`, `player_turn` turn, `player_bonus_trick` `bonus_trick`, `player_bonus_rascal` `bonus_rascal` 
+            FROM `player` ";
+        $sql .= "WHERE `player_id` = '{$winner}'";
+        $winner_infos = Table::getObjectFromDB($sql);
 
         if ((game::$instance->getGameStateValue("kraken") == 0) && (game::$instance->getGameStateValue("white_whale") == 0)) {
             game::$instance->notifyAllPlayers(
@@ -882,7 +892,7 @@ class Pending extends APP_GameClass
 
         if (game::$instance->getGameStateValue("kraken") == 1) {
 
-            $cards = self::getObjectListFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_location = 'table'");
+            $cards = Table::getObjectListFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_location` = 'table'");
 
             foreach ($cards_played as $card_played) {
                 game::$instance->db_card->moveCard($card_played, 'discard', 0);
@@ -904,7 +914,7 @@ class Pending extends APP_GameClass
         if (game::$instance->getGameStateValue("white_whale") == 1) {
             if ($type_card_winner == 'white_whale') {
 
-                $cards = self::getObjectListFromDB("SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg FROM card WHERE card_location = 'table'");
+                $cards = Table::getObjectListFromDB("SELECT `card_id` `id`, `card_type` type, `card_type_arg` type_arg, `card_location` location, `card_location_arg` location_arg FROM `card` WHERE `card_location` = 'table'");
 
                 foreach ($cards_played as $card_played) {
                     game::$instance->db_card->moveCard($card_played, 'discard', 0);
@@ -925,10 +935,10 @@ class Pending extends APP_GameClass
             } else {
                 foreach ($cards_played as $card_played) {
                     // BONUS
-                    $type_card = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_id = '{$card_played}'");
-                    $type_arg_card = self::getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_location = 'table' AND card_id = '{$card_played}'");
+                    $type_card = Table::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_location` = 'table' AND `card_id` = '{$card_played}'");
+                    $type_arg_card = Table::getUniqueValueFromDB("SELECT `card_type_arg` FROM `card` WHERE `card_location` = 'table' AND `card_id` = '{$card_played}'");
                     if ((($type_card == 'green') || ($type_card == 'purple') || ($type_card == 'yellow')) && ($type_arg_card == 14)) {
-                        game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 10 WHERE player_id = '{$winner}' ");
+                        game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 10 WHERE `player_id` = '{$winner}' ");
                         if($type_card == 'green')
                         {
                             $bonus[] = 1;
@@ -945,7 +955,7 @@ class Pending extends APP_GameClass
                         }
                     }
                     if (($type_card == 'black') && ($type_arg_card == 14)) {
-                        game::$instance->DbQuery("UPDATE player set player_bonus_trick = player_bonus_trick + 20 WHERE player_id = '{$winner}' ");
+                        game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = `player_bonus_trick` + 20 WHERE `player_id` = '{$winner}' ");
                         $bonus[] = 4;
                     }
 
@@ -976,7 +986,7 @@ class Pending extends APP_GameClass
         game::$instance->setGameStateValue("requested_color", 0);
         game::$instance->setGameStateValue("requested_color_cannot_change", 0);
         game::$instance->setGameStateValue("tigress_role", 0);
-        game::$instance->DbQuery("UPDATE player set player_turn = 0 ");
+        game::$instance->DbQuery("UPDATE `player` set `player_turn` = 0 ");
         game::$instance->setGameStateValue("kraken", 0);
         game::$instance->setGameStateValue("white_whale", 0);
         game::$instance->setGameStateValue("loot_nb_in_turn", 0);
@@ -990,12 +1000,12 @@ class Pending extends APP_GameClass
 
             //INIT END OF ROUND
 
-            game::$instance->DbQuery("UPDATE player set player_bid = -1 ");
-            game::$instance->DbQuery("UPDATE player set player_bid_validated = 0 ");
-            game::$instance->DbQuery("UPDATE player set player_tricks = 0 ");
-            game::$instance->DbQuery("UPDATE player set player_bonus_trick = 0 ");
-            game::$instance->DbQuery("UPDATE player set player_bonus_rascal = 0 ");
-            game::$instance->DbQuery("UPDATE player set player_bonus_loot = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid` = -1 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid_validated` = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_tricks` = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bonus_rascal` = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = 0 ");
             game::$instance->setGameStateValue("loot_1_id_play", 0);
             game::$instance->setGameStateValue("loot_2_id_play", 0);
             game::$instance->setGameStateValue("loot_1_id_win", 0);
@@ -1004,7 +1014,7 @@ class Pending extends APP_GameClass
             if (game::$instance->getGameStateValue("round_nb") < 10) {
 
                 game::$instance->setGameStateValue("end_of_round", 1);
-                $cards_discard = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'discard'", true);
+                $cards_discard = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'discard'", true);
                 foreach ($cards_discard as $card_discard) {
                     game::$instance->db_card->moveCard($card_discard, 'deck');
                 }
@@ -1019,7 +1029,7 @@ class Pending extends APP_GameClass
 
                 // CALCUL DU PROCHAIN new_round_nb
                 $new_round_nb = game::$instance->getGameStateValue("round_nb") + 1;
-                $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+                $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
 
                 if ((($new_round_nb == 10) && ($count_players == 8)) || (($new_round_nb == 9) && ($count_players == 8))) {
                     $new_round_max_bid = 8;
@@ -1040,7 +1050,7 @@ class Pending extends APP_GameClass
                     )
                 );
 
-                self::DbQuery("DELETE FROM `pending`;");
+                Table::DbQuery("DELETE FROM `pending`;");
 
                 // NOUVEL ORDRE PENDING
 

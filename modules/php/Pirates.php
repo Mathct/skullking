@@ -2,6 +2,8 @@
 
 namespace Bga\Games\skullking; // ATTENTION
 
+use Bga\GameFramework\Table;
+
 trait PiratesTrait  // ATTENTION
 {
 
@@ -41,7 +43,7 @@ trait PiratesTrait  // ATTENTION
         $ret['title'] = clienttranslate('${actplayer} can choose any player to lead the next trick thanks to Rosie D\'Laney');
         $ret['titleyou'] = clienttranslate('Rosie D\'Laney: ${you} must choose any player to lead the next trick');
 
-        $players = self::getObjectListFromDB("SELECT player_id FROM player", true);
+        $players = Table::getObjectListFromDB("SELECT `player_id` FROM `player`", true);
         foreach ($players as $player) {
             $ret["selectable"][] = 'rosie_' . $player;
         }
@@ -60,15 +62,15 @@ trait PiratesTrait  // ATTENTION
             $explode = explode('_', $varg1);
             $id = end($explode);
 
-            $new_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$id}'");
+            $new_name = Table::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$id}'");
 
             game::$instance->setGameStateValue("first_player_trick", $id);
             $nextplayer = $id;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -151,15 +153,15 @@ trait PiratesTrait  // ATTENTION
             $explode = explode('_', $parg1);
             $id = end($explode);
 
-            $new_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$id}'");
+            $new_name = Table::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$id}'");
 
             game::$instance->setGameStateValue("first_player_trick", $id);
             $nextplayer = $id;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -253,7 +255,7 @@ trait PiratesTrait  // ATTENTION
         $ret['title'] = clienttranslate('${actplayer} drew 2 cards and must discard 2 of them thanks to Bendt the Bandit');
         $ret['titleyou'] = clienttranslate('Bendt the Bandit: ${you} have drawn 2 cards. Select 2 cards to discard');
 
-        $all_cards = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'hand' AND card_location_arg = '{$this->player_id}'", true);
+        $all_cards = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'hand' AND `card_location_arg` = '{$this->player_id}'", true);
 
         foreach ($all_cards as $card) {
             $ret["selectablemulti"][] = 'my_cards_item_' . $card;
@@ -293,10 +295,10 @@ trait PiratesTrait  // ATTENTION
 
             $nextplayer = $parg1;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -372,10 +374,10 @@ trait PiratesTrait  // ATTENTION
 
             $nextplayer = $parg2;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -444,7 +446,7 @@ trait PiratesTrait  // ATTENTION
             $explode = explode('_', $varg1);
             $bonus = intval($explode[1]);
 
-            game::$instance->DbQuery("UPDATE player set player_bonus_rascal = $bonus WHERE player_id = '{$this->player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_bonus_rascal` = $bonus WHERE `player_id` = '{$this->player_id}'");
 
             game::$instance->notifyPlayer(
                 $this->player_id,
@@ -457,10 +459,10 @@ trait PiratesTrait  // ATTENTION
 
             $nextplayer = $parg1;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -513,7 +515,7 @@ trait PiratesTrait  // ATTENTION
             $explode = explode('_', $parg2);
             $bonus = intval($explode[1]);
 
-            game::$instance->DbQuery("UPDATE player set player_bonus_rascal = $bonus WHERE player_id = '{$this->player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_bonus_rascal` = $bonus WHERE `player_id` = '{$this->player_id}'");
 
             game::$instance->notifyPlayer(
                 $this->player_id,
@@ -526,10 +528,10 @@ trait PiratesTrait  // ATTENTION
 
             $nextplayer = $parg1;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -607,10 +609,10 @@ trait PiratesTrait  // ATTENTION
 
             $nextplayer = $parg1;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -668,10 +670,10 @@ trait PiratesTrait  // ATTENTION
 
             $nextplayer = $parg1;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -710,7 +712,7 @@ trait PiratesTrait  // ATTENTION
     public function Power5($parg1, $parg2, $varg1, $varg2)
     {
 
-        $player_bid = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id={$this->player_id}");;
+        $player_bid = Table::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id`={$this->player_id}");;
         $max_bid = game::$instance->getGameStateValue("round_max_bid");
         $harry_bids = array();
 
@@ -747,7 +749,7 @@ trait PiratesTrait  // ATTENTION
         $ret['title'] = clienttranslate('${actplayer} can change the bid thanks to Harry the Giant');
         $ret['titleyou'] = clienttranslate('Harry the Giant: ${you} can change your bid');
 
-        $player_bid = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id={$this->player_id}");;
+        $player_bid = Table::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id`={$this->player_id}");;
         $max_bid = game::$instance->getGameStateValue("round_max_bid");
         $harry_bids = array();
 
@@ -775,12 +777,12 @@ trait PiratesTrait  // ATTENTION
         if ($this->player_pref_confirm == 1) {
             $explode = explode('_', $varg1);
             $new_bid = $explode[1];
-            game::$instance->DbQuery("UPDATE player set player_bid = $new_bid WHERE player_id = '{$this->player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid` = $new_bid WHERE `player_id` = '{$this->player_id}'");
 
-            $sql = "SELECT player_no no, player_id id, player_score score, player_name name, player_color color, player_bid bid, player_bid_validated bid_validated, player_tricks tricks, player_turn turn, player_bonus_trick bonus_trick, player_bonus_rascal bonus_rascal 
-            FROM player ";
-            $sql .= "WHERE player_id = '{$this->player_id}'";
-            $bid_infos = $this->getObjectFromDB($sql);
+            $sql = "SELECT `player_no` no, `player_id` `id`, `player_score` score, `player_name` name, `player_color` color, `player_bid` `bid`, `player_bid_validated` bid_validated, `player_tricks` `tricks`, `player_turn` turn, `player_bonus_trick` `bonus_trick`, `player_bonus_rascal` `bonus_rascal` 
+            FROM `player` ";
+            $sql .= "WHERE `player_id` = '{$this->player_id}'";
+            $bid_infos = Table::getObjectFromDB($sql);
 
 
             game::$instance->notifyPlayer(
@@ -806,10 +808,10 @@ trait PiratesTrait  // ATTENTION
 
             $nextplayer = $parg1;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -864,12 +866,12 @@ trait PiratesTrait  // ATTENTION
         if ($varg1 == 'yes') {
             $explode = explode('_', $parg2);
             $new_bid = $explode[1];
-            game::$instance->DbQuery("UPDATE player set player_bid = $new_bid WHERE player_id = '{$this->player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid` = $new_bid WHERE `player_id` = '{$this->player_id}'");
 
-            $sql = "SELECT player_no no, player_id id, player_score score, player_name name, player_color color, player_bid bid, player_bid_validated bid_validated, player_tricks tricks, player_turn turn, player_bonus_trick bonus_trick, player_bonus_rascal bonus_rascal 
-            FROM player ";
-            $sql .= "WHERE player_id = '{$this->player_id}'";
-            $bid_infos = $this->getObjectFromDB($sql);
+            $sql = "SELECT `player_no` no, `player_id` `id`, `player_score` score, `player_name` name, `player_color` color, `player_bid` `bid`, `player_bid_validated` bid_validated, `player_tricks` `tricks`, `player_turn` turn, `player_bonus_trick` `bonus_trick`, `player_bonus_rascal` `bonus_rascal` 
+            FROM `player` ";
+            $sql .= "WHERE `player_id` = '{$this->player_id}'";
+            $bid_infos = Table::getObjectFromDB($sql);
 
 
             game::$instance->notifyPlayer(
@@ -895,10 +897,10 @@ trait PiratesTrait  // ATTENTION
 
             $nextplayer = $parg1;
 
-            self::DbQuery("DELETE FROM `pending`;");
+            Table::DbQuery("DELETE FROM `pending`;");
 
             // NOUVEL ORDRE PENDING
-            $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+            $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
             for ($i = 1; $i <= $count_players; $i++) {
 
                 game::$instance->addPendingFirst($nextplayer, "PlayCard");
@@ -937,7 +939,7 @@ trait PiratesTrait  // ATTENTION
     public function Power6($parg1, $parg2, $varg1, $varg2)
     {
 
-        $player_bid = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id={$this->player_id}");;
+        $player_bid = Table::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id`={$this->player_id}");;
         $max_bid = game::$instance->getGameStateValue("round_max_bid");
         $harry_bids = array();
 
@@ -974,7 +976,7 @@ trait PiratesTrait  // ATTENTION
         $ret['title'] = clienttranslate('${actplayer} can change the bid thanks to Harry the Giant');
         $ret['titleyou'] = clienttranslate('Harry the Giant: ${you} can change your bid');
 
-        $player_bid = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id={$this->player_id}");;
+        $player_bid = Table::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id`={$this->player_id}");;
         $max_bid = game::$instance->getGameStateValue("round_max_bid");
         $harry_bids = array();
 
@@ -1002,12 +1004,12 @@ trait PiratesTrait  // ATTENTION
         if ($this->player_pref_confirm == 1) {
             $explode = explode('_', $varg1);
             $new_bid = $explode[1];
-            game::$instance->DbQuery("UPDATE player set player_bid = $new_bid WHERE player_id = '{$this->player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid` = $new_bid WHERE `player_id` = '{$this->player_id}'");
 
-            $sql = "SELECT player_no no, player_id id, player_score score, player_name name, player_color color, player_bid bid, player_bid_validated bid_validated, player_tricks tricks, player_turn turn, player_bonus_trick bonus_trick, player_bonus_rascal bonus_rascal 
-            FROM player ";
-            $sql .= "WHERE player_id = '{$this->player_id}'";
-            $bid_infos = $this->getObjectFromDB($sql);
+            $sql = "SELECT `player_no` no, `player_id` `id`, `player_score` score, `player_name` name, `player_color` color, `player_bid` `bid`, `player_bid_validated` bid_validated, `player_tricks` `tricks`, `player_turn` turn, `player_bonus_trick` `bonus_trick`, `player_bonus_rascal` `bonus_rascal` 
+            FROM `player` ";
+            $sql .= "WHERE `player_id` = '{$this->player_id}'";
+            $bid_infos = Table::getObjectFromDB($sql);
 
 
             game::$instance->notifyPlayer(
@@ -1037,11 +1039,11 @@ trait PiratesTrait  // ATTENTION
 
             //INIT END OF ROUND
 
-            game::$instance->DbQuery("UPDATE player set player_bid = -1 ");
-            game::$instance->DbQuery("UPDATE player set player_bid_validated = 0 ");
-            game::$instance->DbQuery("UPDATE player set player_tricks = 0 ");
-            game::$instance->DbQuery("UPDATE player set player_bonus_trick = 0 ");
-            game::$instance->DbQuery("UPDATE player set player_bonus_rascal = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid` = -1 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid_validated` = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_tricks` = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bonus_rascal` = 0 ");
             game::$instance->setGameStateValue("loot_1_id_play", 0);
             game::$instance->setGameStateValue("loot_2_id_play", 0);
             game::$instance->setGameStateValue("loot_1_id_win", 0);
@@ -1050,7 +1052,7 @@ trait PiratesTrait  // ATTENTION
             if (game::$instance->getGameStateValue("round_nb") < 10) {
 
                 game::$instance->setGameStateValue("end_of_round", 1);
-                $cards_discard = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'discard'", true);
+                $cards_discard = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'discard'", true);
                 foreach ($cards_discard as $card_discard) {
                     game::$instance->db_card->moveCard($card_discard, 'deck');
                 }
@@ -1065,7 +1067,7 @@ trait PiratesTrait  // ATTENTION
 
                 // CALCUL DU PROCHAIN new_round_nb
                 $new_round_nb = game::$instance->getGameStateValue("round_nb") + 1;
-                $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+                $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
 
                 if ((($new_round_nb == 10) && ($count_players == 8)) || (($new_round_nb == 9) && ($count_players == 8))) {
                     $new_round_max_bid = 8;
@@ -1086,7 +1088,7 @@ trait PiratesTrait  // ATTENTION
                     )
                 );
 
-                self::DbQuery("DELETE FROM `pending`;");
+                Table::DbQuery("DELETE FROM `pending`;");
 
                 // NOUVEL ORDRE PENDING
 
@@ -1137,12 +1139,12 @@ trait PiratesTrait  // ATTENTION
         if ($varg1 == 'yes') {
             $explode = explode('_', $parg2);
             $new_bid = $explode[1];
-            game::$instance->DbQuery("UPDATE player set player_bid = $new_bid WHERE player_id = '{$this->player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid` = $new_bid WHERE `player_id` = '{$this->player_id}'");
 
-            $sql = "SELECT player_no no, player_id id, player_score score, player_name name, player_color color, player_bid bid, player_bid_validated bid_validated, player_tricks tricks, player_turn turn, player_bonus_trick bonus_trick, player_bonus_rascal bonus_rascal 
-            FROM player ";
-            $sql .= "WHERE player_id = '{$this->player_id}'";
-            $bid_infos = $this->getObjectFromDB($sql);
+            $sql = "SELECT `player_no` no, `player_id` `id`, `player_score` score, `player_name` name, `player_color` color, `player_bid` `bid`, `player_bid_validated` bid_validated, `player_tricks` `tricks`, `player_turn` turn, `player_bonus_trick` `bonus_trick`, `player_bonus_rascal` `bonus_rascal` 
+            FROM `player` ";
+            $sql .= "WHERE `player_id` = '{$this->player_id}'";
+            $bid_infos = Table::getObjectFromDB($sql);
 
 
             game::$instance->notifyPlayer(
@@ -1172,11 +1174,11 @@ trait PiratesTrait  // ATTENTION
 
             //INIT END OF ROUND
 
-            game::$instance->DbQuery("UPDATE player set player_bid = -1 ");
-            game::$instance->DbQuery("UPDATE player set player_bid_validated = 0 ");
-            game::$instance->DbQuery("UPDATE player set player_tricks = 0 ");
-            game::$instance->DbQuery("UPDATE player set player_bonus_trick = 0 ");
-            game::$instance->DbQuery("UPDATE player set player_bonus_rascal = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid` = -1 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid_validated` = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_tricks` = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bonus_trick` = 0 ");
+            game::$instance->DbQuery("UPDATE `player` set `player_bonus_rascal` = 0 ");
             game::$instance->setGameStateValue("loot_1_id_play", 0);
             game::$instance->setGameStateValue("loot_2_id_play", 0);
             game::$instance->setGameStateValue("loot_1_id_win", 0);
@@ -1185,7 +1187,7 @@ trait PiratesTrait  // ATTENTION
             if (game::$instance->getGameStateValue("round_nb") < 10) {
 
                 game::$instance->setGameStateValue("end_of_round", 1);
-                $cards_discard = self::getObjectListFromDB("SELECT card_id FROM card WHERE card_location = 'discard'", true);
+                $cards_discard = Table::getObjectListFromDB("SELECT `card_id` FROM `card` WHERE `card_location` = 'discard'", true);
                 foreach ($cards_discard as $card_discard) {
                     game::$instance->db_card->moveCard($card_discard, 'deck');
                 }
@@ -1200,7 +1202,7 @@ trait PiratesTrait  // ATTENTION
 
                 // CALCUL DU PROCHAIN new_round_nb
                 $new_round_nb = game::$instance->getGameStateValue("round_nb") + 1;
-                $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+                $count_players = count(Table::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
 
                 if ((($new_round_nb == 10) && ($count_players == 8)) || (($new_round_nb == 9) && ($count_players == 8))) {
                     $new_round_max_bid = 8;
@@ -1221,7 +1223,7 @@ trait PiratesTrait  // ATTENTION
                     )
                 );
 
-                self::DbQuery("DELETE FROM `pending`;");
+                Table::DbQuery("DELETE FROM `pending`;");
 
                 // NOUVEL ORDRE PENDING
 

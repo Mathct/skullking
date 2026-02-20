@@ -20,21 +20,22 @@ declare(strict_types=1);
 
 namespace Bga\Games\skullking;
 
-
-require_once(APP_GAMEMODULE_PATH . "module/table/table.game.php");
-
 use \Bga\GameFramework\Actions\CheckAction;
+use Bga\GameFramework\Components\Deck;
+use Bga\GameFramework\SystemException;
+use Bga\GameFramework\Table;
+use Bga\GameFramework\VisibleSystemException;
 
 include('Pending.php'); // ATTENTION
 
-class Game extends \Table
+class Game extends Table
 {
     public array $_SUIT_CARDS; // ATTENTION
     public array $_SPECIAL_CARDS;
     public array $_PIRATE_CARDS;
     public array $_ROUNDS;
 
-    public $db_card;
+    public Deck $db_card;
 
 
     public static $instance = null; //ATTENTION
@@ -91,18 +92,7 @@ class Game extends \Table
 
         self::$instance = $this; // ATTENTION
 
-        $this->db_card = self::getNew("module.common.deck");
-        $this->db_card->init("card");
-    }
-
-    /**
-     * Returns the game name.
-     *
-     * IMPORTANT: Please do not modify.
-     */
-    protected function getGameName()
-    {
-        return "skullking";
+        $this->db_card = $this->bga->deckFactory->createDeck("card");
     }
 
 
@@ -141,7 +131,7 @@ class Game extends \Table
         // additional fields directly here.
         static::DbQuery(
             sprintf(
-                "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES %s",
+                "INSERT INTO `player` (`player_id`, `player_color`, `player_canal`, `player_name`, `player_avatar`) VALUES %s",
                 implode(",", $query_values)
             )
         );
@@ -192,7 +182,7 @@ class Game extends \Table
 
 
         // First Player
-        $first_player_id = $this->getUniqueValueFromDb("SELECT player_id FROM player WHERE player_no=1");
+        $first_player_id = $this->getUniqueValueFromDb("SELECT `player_id` FROM `player` WHERE `player_no`=1");
         $this->setGameStateInitialValue("first_player_round", $first_player_id);
         $this->setGameStateInitialValue("first_player_trick", $first_player_id);
 
@@ -246,6 +236,8 @@ class Game extends \Table
         foreach (array_keys($players) as $player_id) {
             $this->addPendingFirst($player_id, "PlayCard");
         }
+
+        return 4;
     }
 
     /////////////////////////////////////////////////////////////////////////////////  
@@ -259,14 +251,11 @@ class Game extends \Table
     //    |___/                                                 
     /////////////////////////////////////////////////////////////////////////////////  
 
-    protected function getAllDatas(): array
+    protected function getAllDatas(int $currentPlayerId): array
     {
         $result = [];
 
-        // WARNING: We must only return information visible by the current player.
-        $current_player_id = (int) $this->getCurrentPlayerId();
-
-        $sql = "SELECT player_no no FROM player WHERE player_id = $current_player_id";
+        $sql = "SELECT `player_no` no FROM `player` WHERE `player_id` = $currentPlayerId";
         $current_player_no = $this->getUniqueValueFromDb($sql);
         if (is_null($current_player_no)) {
             $current_player_no = 0;
@@ -280,9 +269,9 @@ class Game extends \Table
             FROM `player`"
         );
 
-        $sql = "SELECT player_no no, player_id id, player_score score, player_name name, player_color color, player_bid bid, player_bid_validated bid_validated, player_tricks tricks, player_turn turn, player_bonus_trick bonus_trick, player_bonus_rascal bonus_rascal 
-            FROM player ";
-        $sql .= " ORDER BY (player_no >= $current_player_no) DESC, player_no ASC";
+        $sql = "SELECT `player_no` no, `player_id` `id`, `player_score` score, `player_name` name, `player_color` color, `player_bid` `bid`, `player_bid_validated` bid_validated, `player_tricks` `tricks`, `player_turn` turn, `player_bonus_trick` `bonus_trick`, `player_bonus_rascal` `bonus_rascal` 
+            FROM `player` ";
+        $sql .= " ORDER BY (`player_no` >= $current_player_no) DESC, `player_no` ASC";
         $result['players_ordered'] = $this->getObjectListFromDB($sql);
 
         $tricks_taken = $this->db_card->countCardsByLocationArgs('discard');
@@ -290,11 +279,11 @@ class Game extends \Table
             $result["players"][$player_id]["tricks_taken"] = isset($tricks_taken[$player_id]) ? $tricks_taken[$player_id] / count($result["players"]) : 0;
         }
 
-        $result['state_id'] = $this->gamestate->state_id();
+        $result['state_id'] = $this->gamestate->getCurrentMainStateId();
 
 
-        $result['my_hand'] = $this->db_card->getPlayerHand($current_player_id);
-        $result['deck'] = $this->getGameStateValue('juanita_container') == $current_player_id ? $this->db_card->getCardsInLocation('deck') : [];
+        $result['my_hand'] = $this->db_card->getPlayerHand($currentPlayerId);
+        $result['deck'] = $this->getGameStateValue('juanita_container') == $currentPlayerId ? $this->db_card->getCardsInLocation('deck') : [];
         //$result['deck'] =  $this->db_card->getCardsInLocation('deck');
 
         $result['table'] = $this->getCardsOnTableOrdered();
@@ -309,13 +298,13 @@ class Game extends \Table
         $result['special_cards'] = $this->_SPECIAL_CARDS;
         $result['pirate_cards'] = $this->_PIRATE_CARDS;
 
-        $sql = "SELECT id, round, cards, player_id, bid, tricks, tricks_vp, bonus_vp, total_round, type_bid
-            FROM scoring ";
+        $sql = "SELECT `id`, `round`, `cards`, `player_id`, `bid`, `tricks`, `tricks_vp`, `bonus_vp`, `total_round`, `type_bid`
+            FROM `scoring` ";
         $result['scoring'] = $this->getObjectListFromDB($sql);
 
         $result['tigress_role'] = $this->getGameStateValue('tigress_role');
         if ($this->getGameStateValue('tigress_role') != 0) {
-            $result['tigress_cardid'] = self::getUniqueValueFromDB("SELECT card_id FROM card WHERE card_type='tigress'");
+            $result['tigress_cardid'] = self::getUniqueValueFromDB("SELECT `card_id` FROM `card` WHERE `card_type`='tigress'");
         }
 
         $result['rosie_container'] = $this->getGameStateValue('rosie_container');
@@ -396,15 +385,15 @@ class Game extends \Table
 
     function addPending($player_id, $function, $arg = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL)
     {
-        $sql = "INSERT INTO pending (player_id, function, arg, arg2, arg3, arg4) VALUES (" . $player_id . ", '" . $function . "', '" . $arg . "', '" . $arg2 . "', '" . $arg3 . "', '" . $arg4 . "')";
+        $sql = "INSERT INTO `pending` (`player_id`, `function`, `arg`, `arg2`, `arg3`, `arg4`) VALUES (" . $player_id . ", '" . $function . "', '" . $arg . "', '" . $arg2 . "', '" . $arg3 . "', '" . $arg4 . "')";
         self::DbQuery($sql);
     }
 
 
     function addPendingFirst($player_id, $function, $arg = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL)
     {
-        $minid = self::getUniqueValueFromDB("select min(id) from pending") - 1;
-        $sql = "INSERT INTO pending (id, player_id, function, arg, arg2) VALUES (" . $minid . "," . $player_id . ", '" . $function . "', '" . $arg . "', '" . $arg2 . "')";
+        $minid = self::getUniqueValueFromDB("select min(`id`) from `pending`") - 1;
+        $sql = "INSERT INTO `pending` (`id`, `player_id`, `function`, `arg`, `arg2`) VALUES (" . $minid . "," . $player_id . ", '" . $function . "', '" . $arg . "', '" . $arg2 . "')";
         self::DbQuery($sql);
     }
 
@@ -413,20 +402,20 @@ class Game extends \Table
         $ret = self::argPlayerTurn();
 
         if (!in_array($arg1, $ret['selectable']) && !in_array($arg1, $ret['buttons'])) {
-            throw new \BgaSystemException("Not a valid selection");
+            throw new SystemException("Not a valid selection");
         }
     }
 
     public function getCardsOnTableOrdered()
     {
         $current = $this->getGameStateValue('first_player_trick');
-        $current_no = self::getUniqueValueFromDB("SELECT player_no FROM player WHERE player_id = $current");
+        $current_no = self::getUniqueValueFromDB("SELECT `player_no` FROM `player` WHERE `player_id` = $current");
 
         self::dump('current', $current);
 
         self::dump('current_no', $current_no);
 
-        $sql = "SELECT player_id FROM player ORDER BY (player_no >= $current_no) DESC, player_no ASC";
+        $sql = "SELECT `player_id` FROM `player` ORDER BY (`player_no` >= $current_no) DESC, player_no ASC";
         $ordered_ids = $this->getObjectListFromDB($sql, true);
         // ⬅️ Retourne un array simple [2037568, 2037569, ...]
 
@@ -500,7 +489,7 @@ class Game extends \Table
 
         $ordre_players[] = intval($first_player_trick);
         $next = game::$instance->getPlayerAfter($first_player_trick);
-        $count_players = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
+        $count_players = count(self::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
         for ($i = 1; $i <= $count_players - 1; $i++) {
 
             $ordre_players[] = $next;
@@ -510,7 +499,7 @@ class Game extends \Table
         
 
         foreach ($ordre_players as $player) {
-            $type = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_location_arg = '{$player}'");
+            $type = self::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_location` = 'table' AND `card_location_arg` = '{$player}'");
 
             if (($type == 'kraken') && ($white_whale == 0)) {
                 $kraken = 1;
@@ -581,25 +570,25 @@ class Game extends \Table
             $first_escape = $ordre_players[$index];
         }
 
-        $green = self::getUniqueValueFromDB("SELECT card_location_arg FROM card WHERE card_type = 'green' AND card_location = 'table' ORDER BY card_type_arg DESC LIMIT 1");
+        $green = self::getUniqueValueFromDB("SELECT `card_location_arg` FROM `card` WHERE `card_type` = 'green' AND `card_location` = 'table' ORDER BY `card_type_arg` DESC LIMIT 1");
         if ($green != null) {
             $best_green = $green;
         }
-        $purple = self::getUniqueValueFromDB("SELECT card_location_arg FROM card WHERE card_type = 'purple' AND card_location = 'table' ORDER BY card_type_arg DESC LIMIT 1");
+        $purple = self::getUniqueValueFromDB("SELECT `card_location_arg` FROM `card` WHERE `card_type` = 'purple' AND `card_location` = 'table' ORDER BY `card_type_arg` DESC LIMIT 1");
         if ($purple != null) {
             $best_purple = $purple;
         }
-        $yellow = self::getUniqueValueFromDB("SELECT card_location_arg FROM card WHERE card_type = 'yellow' AND card_location = 'table' ORDER BY card_type_arg DESC LIMIT 1");
+        $yellow = self::getUniqueValueFromDB("SELECT `card_location_arg` FROM `card` WHERE `card_type` = 'yellow' AND `card_location` = 'table' ORDER BY `card_type_arg` DESC LIMIT 1");
         if ($yellow != null) {
             $best_yellow = $yellow;
         }
-        $black = self::getUniqueValueFromDB("SELECT card_location_arg FROM card WHERE card_type = 'black' AND card_location = 'table' ORDER BY card_type_arg DESC LIMIT 1");
+        $black = self::getUniqueValueFromDB("SELECT `card_location_arg` FROM `card` WHERE `card_type` = 'black' AND `card_location` = 'table' ORDER BY `card_type_arg` DESC LIMIT 1");
         if ($black != null) {
             $best_black = $black;
         }
 
         if ($white_whale == 1) {
-            $bests_nb = self::getObjectListFromDB("SELECT card_location_arg FROM card WHERE card_type IN ('green', 'purple', 'yellow', 'black') AND card_location = 'table' AND card_type_arg = (SELECT MAX(card_type_arg) FROM card WHERE card_type IN ('green', 'purple', 'yellow', 'black') AND card_location = 'table')", true);
+            $bests_nb = self::getObjectListFromDB("SELECT `card_location_arg` FROM `card` WHERE `card_type` IN ('green', 'purple', 'yellow', 'black') AND `card_location` = 'table' AND `card_type_arg` = (SELECT MAX(`card_type_arg`) FROM `card` WHERE `card_type` IN ('green', 'purple', 'yellow', 'black') AND `card_location` = 'table')", true);
         }
 
         if($kraken == 1) {
@@ -651,7 +640,7 @@ class Game extends \Table
                     {
                                     
 
-                    $type_escape = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_location = 'table' AND card_location_arg = '{$winner}'");
+                    $type_escape = self::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_location` = 'table' AND `card_location_arg` = '{$winner}'");
 
                         if ($type_escape == 'loot') {
                             if ($loot_nb_in_turn == 1) {
@@ -674,7 +663,7 @@ class Game extends \Table
         
             if ($kraken == 0) {
                  
-                game::$instance->DbQuery("UPDATE player set player_tricks = player_tricks +1 WHERE player_id = '{$winner}' ");
+                game::$instance->DbQuery("UPDATE `player` set `player_tricks` = `player_tricks` +1 WHERE `player_id` = '{$winner}' ");
 
                 //LOOT
                 if ($loot_nb_in_turn != 0) // si y a des loot pris en compte
@@ -684,12 +673,12 @@ class Game extends \Table
                         if ($loot2_play == 0) // si c'est le 1er du round
                         {
                             game::$instance->setGameStateValue("loot_1_id_win", $winner);
-                            game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$winner}'");
-                            game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot1_play}'");
+                            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$winner}'");
+                            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot1_play}'");
 
-                            $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
-                            $play_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot1_play}'");
-                            $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot1_play}'");
+                            $winner_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
+                            $play_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot1_play}'");
+                            $play_color = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot1_play}'");
 
                             game::$instance->notifyAllPlayers(
                                 'message',
@@ -708,12 +697,12 @@ class Game extends \Table
                         } else // si c'est le 2eme du round
                         {
                             game::$instance->setGameStateValue("loot_2_id_win", $winner);
-                            game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$winner}'");
-                            game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot2_play}'");
+                            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$winner}'");
+                            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot2_play}'");
 
-                            $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
-                            $play_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot2_play}'");
-                            $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot2_play}'");
+                            $winner_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
+                            $play_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot2_play}'");
+                            $play_color = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot2_play}'");
 
                             game::$instance->notifyAllPlayers(
                                 'message',
@@ -736,15 +725,15 @@ class Game extends \Table
                     {
                         game::$instance->setGameStateValue("loot_1_id_win", $winner);
                         game::$instance->setGameStateValue("loot_2_id_win", $winner);
-                        game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +40 WHERE player_id = '{$winner}'");
-                        game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot1_play}'");
-                        game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot2_play}'");
+                        game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +40 WHERE `player_id` = '{$winner}'");
+                        game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot1_play}'");
+                        game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot2_play}'");
 
-                        $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
-                        $play_name1 = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot1_play}'");
-                        $play_color1 = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot1_play}'");
-                        $play_name2 = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot2_play}'");
-                        $play_color2 = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot2_play}'");
+                        $winner_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
+                        $play_name1 = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot1_play}'");
+                        $play_color1 = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot1_play}'");
+                        $play_name2 = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot2_play}'");
+                        $play_color2 = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot2_play}'");
 
                         game::$instance->notifyAllPlayers(
                             'message',
@@ -788,19 +777,19 @@ class Game extends \Table
             } else {
                 if ($count == 1) {
                     $winner = $bests_nb[0];
-                    game::$instance->DbQuery("UPDATE player set player_tricks = player_tricks +1 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_tricks` = `player_tricks` +1 WHERE `player_id` = '{$winner}' ");
 
                     //LOOT
                     if ($loot_nb_in_turn != 0) {
                         if ($loot_nb_in_turn == 1) {
                             if ($loot2_play == 0) {
                                 game::$instance->setGameStateValue("loot_1_id_win", $winner);
-                                game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$winner}'");
-                                game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot1_play}'");
+                                game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$winner}'");
+                                game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot1_play}'");
 
-                                $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
-                                $play_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot1_play}'");
-                                $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot1_play}'");
+                                $winner_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
+                                $play_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot1_play}'");
+                                $play_color = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot1_play}'");
 
                                 game::$instance->notifyAllPlayers(
                                     'message',
@@ -818,12 +807,12 @@ class Game extends \Table
                                 );
                             } else {
                                 game::$instance->setGameStateValue("loot_2_id_win", $winner);
-                                game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$winner}'");
-                                game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot2_play}'");
+                                game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$winner}'");
+                                game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot2_play}'");
 
-                                $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
-                                $play_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot2_play}'");
-                                $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot2_play}'");
+                                $winner_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
+                                $play_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot2_play}'");
+                                $play_color = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot2_play}'");
 
                                 game::$instance->notifyAllPlayers(
                                     'message',
@@ -845,15 +834,15 @@ class Game extends \Table
                         if ($loot_nb_in_turn == 2) {
                             game::$instance->setGameStateValue("loot_1_id_win", $winner);
                             game::$instance->setGameStateValue("loot_2_id_win", $winner);
-                            game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +40 WHERE player_id = '{$winner}'");
-                            game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot1_play}'");
-                            game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot2_play}'");
+                            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +40 WHERE `player_id` = '{$winner}'");
+                            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot1_play}'");
+                            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot2_play}'");
 
-                            $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
-                            $play_name1 = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot1_play}'");
-                            $play_color1 = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot1_play}'");
-                            $play_name2 = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot2_play}'");
-                            $play_color2 = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot2_play}'");
+                            $winner_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
+                            $play_name1 = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot1_play}'");
+                            $play_color1 = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot1_play}'");
+                            $play_name2 = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot2_play}'");
+                            $play_color2 = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot2_play}'");
 
                             game::$instance->notifyAllPlayers(
                                 'message',
@@ -893,19 +882,19 @@ class Game extends \Table
                             break;
                         }
                     }
-                    game::$instance->DbQuery("UPDATE player set player_tricks = player_tricks +1 WHERE player_id = '{$winner}' ");
+                    game::$instance->DbQuery("UPDATE `player` set `player_tricks` = `player_tricks` +1 WHERE `player_id` = '{$winner}' ");
 
                     //LOOT
                     if ($loot_nb_in_turn != 0) {
                         if ($loot_nb_in_turn == 1) {
                             if ($loot2_play == 0) {
                                 game::$instance->setGameStateValue("loot_1_id_win", $winner);
-                                game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$winner}'");
-                                game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot1_play}'");
+                                game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$winner}'");
+                                game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot1_play}'");
 
-                                $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
-                                $play_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot1_play}'");
-                                $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot1_play}'");
+                                $winner_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
+                                $play_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot1_play}'");
+                                $play_color = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot1_play}'");
 
                                 game::$instance->notifyAllPlayers(
                                     'message',
@@ -923,12 +912,12 @@ class Game extends \Table
                                 );
                             } else {
                                 game::$instance->setGameStateValue("loot_2_id_win", $winner);
-                                game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$winner}'");
-                                game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot2_play}'");
+                                game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$winner}'");
+                                game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot2_play}'");
 
-                                $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
-                                $play_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot2_play}'");
-                                $play_color = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot2_play}'");
+                                $winner_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
+                                $play_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot2_play}'");
+                                $play_color = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot2_play}'");
 
                                 game::$instance->notifyAllPlayers(
                                     'message',
@@ -950,15 +939,15 @@ class Game extends \Table
                         if ($loot_nb_in_turn == 2) {
                             game::$instance->setGameStateValue("loot_1_id_win", $winner);
                             game::$instance->setGameStateValue("loot_2_id_win", $winner);
-                            game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +40 WHERE player_id = '{$winner}'");
-                            game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot1_play}'");
-                            game::$instance->DbQuery("UPDATE player set player_bonus_loot = player_bonus_loot +20 WHERE player_id = '{$loot2_play}'");
+                            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +40 WHERE `player_id` = '{$winner}'");
+                            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot1_play}'");
+                            game::$instance->DbQuery("UPDATE `player` set `player_bonus_loot` = `player_bonus_loot` +20 WHERE `player_id` = '{$loot2_play}'");
 
-                            $winner_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$winner}'");
-                            $play_name1 = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot1_play}'");
-                            $play_color1 = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot1_play}'");
-                            $play_name2 = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$loot2_play}'");
-                            $play_color2 = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$loot2_play}'");
+                            $winner_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$winner}'");
+                            $play_name1 = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot1_play}'");
+                            $play_color1 = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot1_play}'");
+                            $play_name2 = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$loot2_play}'");
+                            $play_color2 = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$loot2_play}'");
 
                             game::$instance->notifyAllPlayers(
                                 'message',
@@ -1002,15 +991,15 @@ class Game extends \Table
 
     function scoreRound()
     {
-        $players = self::getObjectListFromDB("SELECT player_id FROM player", true);
+        $players = self::getObjectListFromDB("SELECT `player_id` FROM `player`", true);
         $round = $this->getGameStateValue("round_nb");
         $cards = $this->getGameStateValue("round_max_bid");
 
         foreach ($players as $player) {
 
 
-            $bid = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$player}'");
-            $tricks = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$player}'");
+            $bid = self::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id` = '{$player}'");
+            $tricks = self::getUniqueValueFromDB("SELECT `player_tricks` FROM `player` WHERE `player_id` = '{$player}'");
 
             // BONUS
 
@@ -1020,14 +1009,14 @@ class Game extends \Table
             $tricks_vp = 0;
 
             if ($tricks == $bid) {
-                $bonus_trick = self::getUniqueValueFromDB("SELECT player_bonus_trick FROM player WHERE player_id = '{$player}'");
-                $bonus_rascal = self::getUniqueValueFromDB("SELECT player_bonus_rascal FROM player WHERE player_id = '{$player}'");
+                $bonus_trick = self::getUniqueValueFromDB("SELECT `player_bonus_trick` FROM `player` WHERE `player_id` = '{$player}'");
+                $bonus_rascal = self::getUniqueValueFromDB("SELECT `player_bonus_rascal` FROM `player` WHERE `player_id` = '{$player}'");
                 $bonus_vp = $bonus_trick + $bonus_rascal;
             }
 
             if ($tricks != $bid) {
 
-                $bonus_rascal = self::getUniqueValueFromDB("SELECT player_bonus_rascal FROM player WHERE player_id = '{$player}'");
+                $bonus_rascal = self::getUniqueValueFromDB("SELECT `player_bonus_rascal` FROM `player` WHERE `player_id` = '{$player}'");
                 $bonus_vp = $bonus_trick - $bonus_rascal;
             }
 
@@ -1059,13 +1048,13 @@ class Game extends \Table
             $total_round = $tricks_vp + $bonus_vp;
 
 
-            $rappel_bonus_trick = self::getUniqueValueFromDB("SELECT player_bonus_trick FROM player WHERE player_id = '{$player}'");
-            $rappel_bonus_rascal = self::getUniqueValueFromDB("SELECT player_bonus_rascal FROM player WHERE player_id = '{$player}'");
-            $rappel_bonus_loot = self::getUniqueValueFromDB("SELECT player_bonus_loot FROM player WHERE player_id = '{$player}'");
+            $rappel_bonus_trick = self::getUniqueValueFromDB("SELECT `player_bonus_trick` FROM `player` WHERE `player_id` = '{$player}'");
+            $rappel_bonus_rascal = self::getUniqueValueFromDB("SELECT `player_bonus_rascal` FROM `player` WHERE `player_id` = '{$player}'");
+            $rappel_bonus_loot = self::getUniqueValueFromDB("SELECT `player_bonus_loot` FROM `player` WHERE `player_id` = '{$player}'");
 
             // INSERT BD SCORING
 
-            self::DbQuery("INSERT INTO scoring (round, cards, player_id, bid, tricks, tricks_vp, bonus_vp, total_round, bonus_trick, bonus_rascal, bonus_loot) VALUES ($round, $cards, $player, $bid, $tricks, $tricks_vp, $bonus_vp, $total_round, $rappel_bonus_trick, $rappel_bonus_rascal, $rappel_bonus_loot)");
+            self::DbQuery("INSERT INTO `scoring` (`round`, `cards`, `player_id`, `bid`, `tricks`, `tricks_vp`, `bonus_vp`, `total_round`, `bonus_trick`, `bonus_rascal`, `bonus_loot`) VALUES ($round, $cards, $player, $bid, $tricks, $tricks_vp, $bonus_vp, $total_round, $rappel_bonus_trick, $rappel_bonus_rascal, $rappel_bonus_loot)");
         }
 
         // BONUS LOOT CARD
@@ -1078,38 +1067,38 @@ class Game extends \Table
         $round = $this->getGameStateValue("round_nb");
 
         if (($play1 != 0) && ($win1 != 0)) {
-            $bid1 = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$play1}'");
-            $tricks1 = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$play1}'");
-            $bid2 = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$win1}'");
-            $tricks2 = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$win1}'");
+            $bid1 = self::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id` = '{$play1}'");
+            $tricks1 = self::getUniqueValueFromDB("SELECT `player_tricks` FROM `player` WHERE `player_id` = '{$play1}'");
+            $bid2 = self::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id` = '{$win1}'");
+            $tricks2 = self::getUniqueValueFromDB("SELECT `player_tricks` FROM `player` WHERE `player_id` = '{$win1}'");
 
             if (($bid1 == $tricks1) && ($bid2 == $tricks2)) {
-                game::$instance->DbQuery("UPDATE scoring set bonus_vp = bonus_vp + 20 WHERE player_id = '{$play1}' AND round = '{$round}'");
-                game::$instance->DbQuery("UPDATE scoring set bonus_vp = bonus_vp + 20 WHERE player_id = '{$win1}' AND round = '{$round}'");
-                game::$instance->DbQuery("UPDATE scoring set total_round = total_round + 20 WHERE player_id = '{$play1}' AND round = '{$round}'");
-                game::$instance->DbQuery("UPDATE scoring set total_round = total_round + 20 WHERE player_id = '{$win1}' AND round = '{$round}'");
+                game::$instance->DbQuery("UPDATE `scoring` set `bonus_vp` = `bonus_vp` + 20 WHERE `player_id` = '{$play1}' AND round = '{$round}'");
+                game::$instance->DbQuery("UPDATE `scoring` set `bonus_vp` = `bonus_vp` + 20 WHERE `player_id` = '{$win1}' AND round = '{$round}'");
+                game::$instance->DbQuery("UPDATE `scoring` set `total_round` = `total_round` + 20 WHERE `player_id` = '{$play1}' AND round = '{$round}'");
+                game::$instance->DbQuery("UPDATE `scoring` set `total_round` = `total_round` + 20 WHERE `player_id` = '{$win1}' AND round = '{$round}'");
             }
         }
 
         if (($play2 != 0) && ($win2 != 0)) {
-            $bid1 = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$play2}'");
-            $tricks1 = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$play2}'");
-            $bid2 = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$win2}'");
-            $tricks2 = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$win2}'");
+            $bid1 = self::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id` = '{$play2}'");
+            $tricks1 = self::getUniqueValueFromDB("SELECT `player_tricks` FROM `player` WHERE `player_id` = '{$play2}'");
+            $bid2 = self::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id` = '{$win2}'");
+            $tricks2 = self::getUniqueValueFromDB("SELECT `player_tricks` FROM `player` WHERE `player_id` = '{$win2}'");
 
             if (($bid1 == $tricks1) && ($bid2 == $tricks2)) {
-                game::$instance->DbQuery("UPDATE scoring set bonus_vp = bonus_vp + 20 WHERE player_id = '{$play2}' AND round = '{$round}'");
-                game::$instance->DbQuery("UPDATE scoring set bonus_vp = bonus_vp + 20 WHERE player_id = '{$win2}' AND round = '{$round}'");
-                game::$instance->DbQuery("UPDATE scoring set total_round = total_round + 20 WHERE player_id = '{$play2}' AND round = '{$round}'");
-                game::$instance->DbQuery("UPDATE scoring set total_round = total_round + 20 WHERE player_id = '{$win2}' AND round = '{$round}'");
+                game::$instance->DbQuery("UPDATE `scoring` set `bonus_vp` = `bonus_vp` + 20 WHERE `player_id` = '{$play2}' AND round = '{$round}'");
+                game::$instance->DbQuery("UPDATE `scoring` set `bonus_vp` = `bonus_vp` + 20 WHERE `player_id` = '{$win2}' AND round = '{$round}'");
+                game::$instance->DbQuery("UPDATE `scoring` set `total_round` = `total_round` + 20 WHERE `player_id` = '{$play2}' AND round = '{$round}'");
+                game::$instance->DbQuery("UPDATE `scoring` set `total_round` = `total_round` + 20 WHERE `player_id` = '{$win2}' AND round = '{$round}'");
             }
         }
 
 
         foreach ($players as $player) {
-            $score_round = self::getUniqueValueFromDB("SELECT total_round FROM scoring WHERE player_id = '{$player}' AND round = '{$round}'");
-            game::$instance->DbQuery("UPDATE player set player_score = player_score + $score_round WHERE player_id = '{$player}'");
-            $new_score = self::getUniqueValueFromDB("SELECT player_score FROM player WHERE player_id = '{$player}'");
+            $score_round = self::getUniqueValueFromDB("SELECT `total_round` FROM `scoring` WHERE `player_id` = '{$player}' AND round = '{$round}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_score` = `player_score` + $score_round WHERE `player_id` = '{$player}'");
+            $new_score = self::getUniqueValueFromDB("SELECT `player_score` FROM `player` WHERE `player_id` = '{$player}'");
 
             game::$instance->notifyAllPlayers(
                 'score',
@@ -1166,26 +1155,26 @@ class Game extends \Table
         $player_info = $this->loadPlayersBasicInfos();
         foreach ($player_info as $player) {
 
-            $cards = self::getUniqueValueFromDB("SELECT cards FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+            $cards = self::getUniqueValueFromDB("SELECT `cards` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
             array_push($scoringdialog_cards, $cards);
-            $bid = self::getUniqueValueFromDB("SELECT bid FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+            $bid = self::getUniqueValueFromDB("SELECT `bid` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
             array_push($scoringdialog_bid, $bid);
-            $trick = self::getUniqueValueFromDB("SELECT tricks FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+            $trick = self::getUniqueValueFromDB("SELECT `tricks` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
             array_push($scoringdialog_trick, $trick);
-            $trick_vp = self::getUniqueValueFromDB("SELECT tricks_vp FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+            $trick_vp = self::getUniqueValueFromDB("SELECT `tricks_vp` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
             array_push($scoringdialog_trick_vp, $trick_vp);
-            $bonus = self::getUniqueValueFromDB("SELECT bonus_vp FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+            $bonus = self::getUniqueValueFromDB("SELECT `bonus_vp` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
             array_push($scoringdialog_bonus, $bonus);
-            $total = self::getUniqueValueFromDB("SELECT total_round FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+            $total = self::getUniqueValueFromDB("SELECT `total_round` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
             array_push($scoringdialog_total, $total);
-            $bonustrick = self::getUniqueValueFromDB("SELECT bonus_trick FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+            $bonustrick = self::getUniqueValueFromDB("SELECT `bonus_trick` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
             array_push($scoringdialog_bonustrick, $bonustrick);
-            $bonusrascal = self::getUniqueValueFromDB("SELECT bonus_rascal FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+            $bonusrascal = self::getUniqueValueFromDB("SELECT `bonus_rascal` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
             if ($bonusrascal != 0) {
                 $bonusrascal = '+/- ' . $bonusrascal;
             }
             array_push($scoringdialog_bonusrascal, $bonusrascal);
-            $bonusloot = self::getUniqueValueFromDB("SELECT bonus_loot FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+            $bonusloot = self::getUniqueValueFromDB("SELECT `bonus_loot` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
             array_push($scoringdialog_bonusloot, $bonusloot);
 
 
@@ -1210,7 +1199,7 @@ class Game extends \Table
         ];
 
 
-        $this->notifyAllPlayers("tableWindow", '', array(
+        $this->bga->notify->all("tableWindow", '', array(
             "id" => 'finalScoring',
             "title" => clienttranslate("Round") . ' ' . $round,
             "table" => $table,
@@ -1218,7 +1207,7 @@ class Game extends \Table
         ));
 
 
-        self::notifyAllPlayers('simplePause', '', ['time' => 3000]);
+        $this->bga->notify->all('simplePause', '', ['time' => 3000]);
     }
 
 
@@ -1227,8 +1216,8 @@ class Game extends \Table
     function getLogsType($card_id)
     {
         $type = 0;
-        $card_type = self::getUniqueValueFromDB("SELECT card_type FROM card WHERE card_id='{$card_id}'");
-        $card_type_arg = intval(self::getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_id='{$card_id}'"));
+        $card_type = self::getUniqueValueFromDB("SELECT `card_type` FROM `card` WHERE `card_id`='{$card_id}'");
+        $card_type_arg = intval(self::getUniqueValueFromDB("SELECT `card_type_arg` FROM `card` WHERE `card_id`='{$card_id}'"));
 
 
         if ($card_type == 'green') {
@@ -1326,7 +1315,7 @@ class Game extends \Table
 
         if ($count >= 2) {
             $player_id = $bonus[0];
-            $player_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = '{$player_id}'");
+            $player_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id` = '{$player_id}'");
 
             array_shift($bonus);
             foreach ($bonus as $info) {
@@ -1447,17 +1436,17 @@ class Game extends \Table
     public function actSelect(string $arg1)
     {
 
-        if ($this->gamestate->state()['name'] == "playerTurnMulti") {
+        if ($this->gamestate->getCurrentMainState()->name == "playerTurnMulti") {
 
-            $player_id = $this->getCurrentPlayerId();
+            $player_id = (int)$this->getCurrentPlayerId();
             $player_name = self::getPlayerNameById($player_id);
 
             $explode = explode('_', $arg1);
             $bet = $explode[1];
 
-            game::$instance->DbQuery("UPDATE player set player_bid = $bet WHERE player_id = '{$player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid` = $bet WHERE `player_id` = '{$player_id}'");
 
-            $bet = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id={$player_id}");
+            $bet = self::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id`={$player_id}");
             if($bet == -1)
             {
                 $this->gamestate->nextPrivateState($player_id, "same");
@@ -1471,9 +1460,9 @@ class Game extends \Table
         } else {
             self::checkArgs($arg1);
 
-            $pending =  self::getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
+            $pending =  self::getObjectFromDB("SELECT* FROM `pending` order by `id` desc limit 1");
             $this->callPending($pending, true, $arg1);
-            self::DbQuery("DELETE FROM pending WHERE id=" . $pending['id']);
+            self::DbQuery("DELETE FROM `pending` WHERE `id`=" . $pending['id']);
             //$this->giveExtraTime(self::getActivePlayerId());
             $this->gamestate->nextState('next');
         }
@@ -1484,9 +1473,9 @@ class Game extends \Table
 
         self::checkArgs($arg1);
 
-        $pending =  self::getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
+        $pending =  self::getObjectFromDB("SELECT* FROM `pending` order by `id` desc limit 1");
         $this->callPending($pending, true, $arg1);
-        self::DbQuery("DELETE FROM pending WHERE id=" . $pending['id']);
+        self::DbQuery("DELETE FROM `pending` WHERE `id`=" . $pending['id']);
         //$this->giveExtraTime(self::getActivePlayerId());
         $this->gamestate->nextState('next');
     }
@@ -1495,19 +1484,19 @@ class Game extends \Table
     public function actConfirmBid(string $arg1)
     {
         if ($arg1 == 'no') {
-            $player_id = $this->getCurrentPlayerId();
+            $player_id = (int)$this->getCurrentPlayerId();
             $player_name = self::getPlayerNameById($player_id);
 
-            game::$instance->DbQuery("UPDATE player set player_bid = -1 WHERE player_id = '{$player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid` = -1 WHERE `player_id` = '{$player_id}'");
 
             $this->gamestate->nextPrivateState($player_id, "backtochoosebid");
         }
 
         if ($arg1 == 'yes') {
-            $player_id = $this->getCurrentPlayerId();
+            $player_id = (int)$this->getCurrentPlayerId();
             $player_name = self::getPlayerNameById($player_id);
 
-            game::$instance->DbQuery("UPDATE player set player_bid_validated = 1 WHERE player_id = '{$player_id}'");
+            game::$instance->DbQuery("UPDATE `player` set `player_bid_validated` = 1 WHERE `player_id` = '{$player_id}'");
 
             $this->giveExtraTime($player_id);
             $this->gamestate->setPlayerNonMultiactive($player_id, 'next');
@@ -1517,9 +1506,9 @@ class Game extends \Table
     public function actValidate_Multi_Bendt(string $arg1)
     {
 
-        $pending =  self::getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
+        $pending =  self::getObjectFromDB("SELECT* FROM `pending` order by `id` desc limit 1");
         $this->callPending($pending, true, $arg1);
-        self::DbQuery("delete from pending where id=" . $pending['id']);
+        self::DbQuery("delete from `pending` where `id`=" . $pending['id']);
         $this->gamestate->nextState('next');
     }
 
@@ -1571,33 +1560,33 @@ class Game extends \Table
 
         $player_info = $this->loadPlayersBasicInfos();
 
-        $bid_not_validated = self::getObjectListFromDB("SELECT player_id id FROM player WHERE player_bid_validated = 0", true);
+        $bid_not_validated = self::getObjectListFromDB("SELECT `player_id` `id` FROM `player` WHERE `player_bid_validated` = 0", true);
 
         if ($round < $this->getGameStateValue("round_nb")) {
 
             foreach ($player_info as $player) {
 
-                $cards = self::getUniqueValueFromDB("SELECT cards FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                $cards = self::getUniqueValueFromDB("SELECT `cards` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
                 array_push($scoringdialog_cards, $cards);
-                $bid = self::getUniqueValueFromDB("SELECT bid FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                $bid = self::getUniqueValueFromDB("SELECT `bid` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
                 array_push($scoringdialog_bid, $bid);
-                $trick = self::getUniqueValueFromDB("SELECT tricks FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                $trick = self::getUniqueValueFromDB("SELECT `tricks` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
                 array_push($scoringdialog_trick, $trick);
-                $trick_vp = self::getUniqueValueFromDB("SELECT tricks_vp FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                $trick_vp = self::getUniqueValueFromDB("SELECT `tricks_vp` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
                 array_push($scoringdialog_trick_vp, $trick_vp);
-                $bonus = self::getUniqueValueFromDB("SELECT bonus_vp FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                $bonus = self::getUniqueValueFromDB("SELECT `bonus_vp` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
                 array_push($scoringdialog_bonus, $bonus);
-                $total = self::getUniqueValueFromDB("SELECT total_round FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                $total = self::getUniqueValueFromDB("SELECT `total_round` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
                 array_push($scoringdialog_total, $total);
 
-                $bonustrick = self::getUniqueValueFromDB("SELECT bonus_trick FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                $bonustrick = self::getUniqueValueFromDB("SELECT `bonus_trick` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
                 array_push($scoringdialog_bonustrick, $bonustrick);
-                $bonusrascal = self::getUniqueValueFromDB("SELECT bonus_rascal FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                $bonusrascal = self::getUniqueValueFromDB("SELECT `bonus_rascal` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
                 if ($bonusrascal != 0) {
                     $bonusrascal = '+/- ' . $bonusrascal;
                 }
                 array_push($scoringdialog_bonusrascal, $bonusrascal);
-                $bonusloot = self::getUniqueValueFromDB("SELECT bonus_loot FROM scoring WHERE player_id = '{$player["player_id"]}' AND round = '{$round}'");
+                $bonusloot = self::getUniqueValueFromDB("SELECT `bonus_loot` FROM `scoring` WHERE `player_id` = '{$player["player_id"]}' AND round = '{$round}'");
                 array_push($scoringdialog_bonusloot, $bonusloot);
 
                 array_push($scoringdialog_playernames, [
@@ -1620,14 +1609,14 @@ class Game extends \Table
                 if ($bid_not_validated != null) {
                     $bid = "-";
                 } else {
-                    $bid = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id = '{$player["player_id"]}'");
+                    $bid = self::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id` = '{$player["player_id"]}'");
                 }
                 array_push($scoringdialog_bid, $bid);
 
                 if ($bid_not_validated != null) {
                     $trick = "-";
                 } else {
-                    $trick = self::getUniqueValueFromDB("SELECT player_tricks FROM player WHERE player_id = '{$player["player_id"]}'");
+                    $trick = self::getUniqueValueFromDB("SELECT `player_tricks` FROM `player` WHERE `player_id` = '{$player["player_id"]}'");
                 }
                 array_push($scoringdialog_trick, $trick);
 
@@ -1641,14 +1630,14 @@ class Game extends \Table
                 if ($bid_not_validated != null) {
                     $bonustrick = "-";
                 } else {
-                    $bonustrick = self::getUniqueValueFromDB("SELECT player_bonus_trick FROM player WHERE player_id = '{$player["player_id"]}'");
+                    $bonustrick = self::getUniqueValueFromDB("SELECT `player_bonus_trick` FROM `player` WHERE `player_id` = '{$player["player_id"]}'");
                 }
                 array_push($scoringdialog_bonustrick, $bonustrick);
 
                 if ($bid_not_validated != null) {
                     $bonusrascal = "-";
                 } else {
-                    $bonusrascal = self::getUniqueValueFromDB("SELECT player_bonus_rascal FROM player WHERE player_id = '{$player["player_id"]}'");
+                    $bonusrascal = self::getUniqueValueFromDB("SELECT `player_bonus_rascal` FROM `player` WHERE `player_id` = '{$player["player_id"]}'");
                     if ($bonusrascal != 0) {
                         $bonusrascal = '+/- ' . $bonusrascal;
                     }
@@ -1658,7 +1647,7 @@ class Game extends \Table
                 if ($bid_not_validated != null) {
                     $bonusloot = "-";
                 } else {
-                    $bonusloot = self::getUniqueValueFromDB("SELECT player_bonus_loot FROM player WHERE player_id = '{$player["player_id"]}'");
+                    $bonusloot = self::getUniqueValueFromDB("SELECT `player_bonus_loot` FROM `player` WHERE `player_id` = '{$player["player_id"]}'");
                 }
                 array_push($scoringdialog_bonusloot, $bonusloot);
 
@@ -1687,7 +1676,7 @@ class Game extends \Table
             $scoringdialog_total,
         ];
 
-        $this->notifyPlayer($currentplayer_id, "tableWindow", '', array(
+        $this->bga->notify->player((int)$currentplayer_id, "tableWindow", '', array(
 
             "id" => 'finalScoring',
             "title" => clienttranslate("Round") . ' ' . $round,
@@ -1695,7 +1684,7 @@ class Game extends \Table
             "closing" => clienttranslate("Close")
         ));
 
-        $this->notifyPlayer($currentplayer_id, "scoreButton", '', array(
+        $this->bga->notify->player((int)$currentplayer_id, "scoreButton", '', array(
             "round" => $this->getGameStateValue("round_nb"),
             "viewround" => $round,
 
@@ -1741,7 +1730,7 @@ class Game extends \Table
         $args["selected"][$player] = array();
         $args["buttons"][$player] = array();
 
-        $bet = self::getUniqueValueFromDB("SELECT player_bid FROM player WHERE player_id={$player}");
+        $bet = self::getUniqueValueFromDB("SELECT `player_bid` FROM `player` WHERE `player_id`={$player}");
 
         $args["selected"][$player][] = 'bid_' . $bet;
 
@@ -1754,7 +1743,7 @@ class Game extends \Table
 
     public function argPlayerTurn()
     {
-        $pending =  self::getObjectFromDB("SELECT* FROM pending ORDER BY id DESC LIMIT 1");
+        $pending =  self::getObjectFromDB("SELECT* FROM `pending` ORDER BY `id` DESC LIMIT 1");
         $arg = $this->callPending($pending, false);
 
         return $arg;
@@ -1798,7 +1787,7 @@ class Game extends \Table
     public function stPending()
     {
         if (game::$instance->getGameStateValue("end_of_round") != 1) {
-            $pending =  self::getObjectFromDB("SELECT * FROM pending ORDER BY id DESC LIMIT 1");
+            $pending =  self::getObjectFromDB("SELECT * FROM `pending` ORDER BY `id` DESC LIMIT 1");
             if ($pending == null) {
                 $this->gamestate->nextState('end');
             } else {
@@ -1814,7 +1803,7 @@ class Game extends \Table
                 } else if ($args == null || (count($args['selectable']) == 0 && count($args['buttons']) == 0)) {
                     //no args required, execute
                     $this->callPending($pending, true);
-                    self::DbQuery("DELETE FROM pending WHERE id=" . $pending['id']);
+                    self::DbQuery("DELETE FROM `pending` WHERE `id`=" . $pending['id']);
                     $this->gamestate->nextState('same');
                 } else {
 
@@ -1834,7 +1823,7 @@ class Game extends \Table
         $new_round_nb = $this->getGameStateValue("round_nb") + 1;
         $this->setGameStateValue("round_nb", $new_round_nb);
 
-        $players = self::getObjectListFromDB("SELECT player_id id FROM player", true);
+        $players = self::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true);
         $nbre_players = count($players);
 
 
@@ -1896,7 +1885,7 @@ class Game extends \Table
 
 
 
-        $bids = self::getObjectListFromDB("SELECT player_id id, player_bid bid, player_tricks tricks FROM player");
+        $bids = self::getObjectListFromDB("SELECT `player_id` `id`, `player_bid` `bid`, `player_tricks` `tricks` FROM `player`");
 
         game::$instance->notifyAllPlayers(
             'showBids',
@@ -1907,7 +1896,7 @@ class Game extends \Table
         );
 
 
-        self::notifyAllPlayers('simplePause', '', ['time' => 1500]);
+        $this->bga->notify->all('simplePause', '', ['time' => 1500]);
 
         game::$instance->notifyAllPlayers('message', clienttranslate('${message}'), [
             'message' => [
@@ -1959,7 +1948,7 @@ class Game extends \Table
             switch ($state_name) {
                 default: {
                         $player_id = $this->getActivePlayerId();
-                        self::DbQuery("DELETE FROM pending WHERE player_id = {$player_id}");
+                        self::DbQuery("DELETE FROM `pending` WHERE `player_id` = {$player_id}");
                         $this->gamestate->nextState("end");
                         break;
                     }
@@ -1975,6 +1964,6 @@ class Game extends \Table
             return;
         }
 
-        throw new \feException("Zombie mode not supported at this game state: \"{$state_name}\".");
+        throw new VisibleSystemException("Zombie mode not supported at this game state: \"{$state_name}\".");
     }
 }
