@@ -221,6 +221,12 @@ class Pending
                         
                     }
 
+                    if (game::$instance->getGameStateValue("requested_color_cannot_change") == 1) {
+                        if (($type == 'kraken')||($type == 'white_whale')) {
+                            game::$instance->setGameStateValue("requested_color", 0);
+                        }
+                    }
+
 
 
 
@@ -358,6 +364,12 @@ class Pending
                     {
                         game::$instance->setGameStateValue("kraken_first_card", 1);
                     }
+                }
+            }
+
+            if (game::$instance->getGameStateValue("requested_color_cannot_change") == 1) {
+                if (($type == 'kraken')||($type == 'white_whale')) {
+                    game::$instance->setGameStateValue("requested_color", 0);
                 }
             }
 
